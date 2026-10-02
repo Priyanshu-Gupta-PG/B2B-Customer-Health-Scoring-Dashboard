@@ -78,7 +78,9 @@ export function Modal({
           </button>
         </div>
         <div className="overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="flex justify-end gap-2 border-t border-border px-5 py-4">{footer}</div>}
+        {footer && (
+          <div className="border-border flex flex-wrap justify-end gap-2 border-t px-5 py-4">{footer}</div>
+        )}
       </div>
     </div>
   );

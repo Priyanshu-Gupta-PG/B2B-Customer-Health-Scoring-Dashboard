@@ -18,7 +18,9 @@ export async function updateRule(id: string, body: UpdateRuleRequest): Promise<U
   return data;
 }
 
-export async function bulkUpdateRules(body: BulkUpdateRulesRequest): Promise<BulkUpdateRulesResponse> {
+export async function bulkUpdateRules(
+  body: BulkUpdateRulesRequest,
+): Promise<BulkUpdateRulesResponse> {
   const { data } = await apiClient.put<BulkUpdateRulesResponse>("/rules", body);
   return data;
 }

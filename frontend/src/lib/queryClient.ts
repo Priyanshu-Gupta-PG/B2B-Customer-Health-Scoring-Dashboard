@@ -1,5 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/errors";
+import type { AccountListParams, AuditLogParams } from "@/types/api";
 
 export function makeQueryClient() {
   return new QueryClient({
@@ -22,10 +23,10 @@ export function makeQueryClient() {
 
 export const queryKeys = {
   dashboard: ["dashboard"] as const,
-  accounts: (params: Record<string, unknown> = {}) => ["accounts", params] as const,
+  accounts: (params: AccountListParams = {}) => ["accounts", params] as const,
   account: (id: string) => ["account", id] as const,
   accountHistory: (id: string, days: number) => ["account", id, "history", days] as const,
   rules: ["rules"] as const,
-  auditLogs: (params: Record<string, unknown> = {}) => ["audit-logs", params] as const,
+  auditLogs: (params: AuditLogParams = {}) => ["audit-logs", params] as const,
   health: ["health"] as const,
 };

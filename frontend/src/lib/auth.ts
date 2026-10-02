@@ -8,6 +8,12 @@ import type { AuthUser } from "@/types/api";
 const TOKEN_KEY = "hd.token";
 const USER_KEY = "hd.user";
 const EXPIRES_KEY = "hd.expires_at";
+export const AUTH_CHANGE_EVENT = "hd-auth-change";
+
+export function notifyAuthChange() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+}
 
 export interface StoredSession {
   token: string;

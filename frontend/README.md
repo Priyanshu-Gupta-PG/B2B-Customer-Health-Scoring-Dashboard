@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Health Dashboard frontend
 
-## Getting Started
+Next.js (App Router) UI for the B2B Customer Health Scoring Dashboard. Talks to Express at `/api/v1` when the backend is up, or to [MSW](https://mswjs.io) mocks when `NEXT_PUBLIC_USE_MOCKS=true`.
 
-First, run the development server:
+## Prerequisites
+
+- Node.js 20+
+- npm 10+
+
+## Run locally
 
 ```bash
+cd frontend
+npm ci
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). The app redirects `/` to `/dashboard` (then `/login` if you have no session).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local`. All variables are public (`NEXT_PUBLIC_*`) and are baked in at build time.
 
-## Learn More
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:4000/api/v1` | Express API base. `GET /health` is called on the origin of this URL. |
+| `NEXT_PUBLIC_USE_MOCKS` | `true` in `.env.example` | `true` starts the MSW worker and intercepts `/api/v1` + `/health`. Set `false` once Express is running. |
 
-To learn more about Next.js, take a look at the following resources:
+### Demo credentials (MSW only)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+From `src/mocks/db.ts`, shown on the login form when mocks are on:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Role | Email | Password |
+| --- | --- | --- |
+| Administrator | `admin@company.com` | `Admin123!` |
+| CSM (read-only) | `csm@company.com` | `Csm12345!` |
 
-## Deploy on Vercel
+Admin can edit scoring weights and trigger ingestion. CSM can view every screen but cannot save rules or run ingest.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev          # next dev
+npm run lint
+npm run type-check
+npm run build
+npm start            # next start (after build)
+```
+
+## Docker
+
+`next.config.ts` uses `output: "standalone"`. Build from this directory:
+
+```bash
+docker build -t health-dashboard-frontend \
+  --build-arg NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1 \
+  --build-arg NEXT_PUBLIC_USE_MOCKS=false \
+  .
+docker run --rm -p 3000:3000 health-dashboard-frontend
+```
+
+`NEXT_PUBLIC_*` values must be passed as build args; they are inlined at compile time.
+
+## API contract gaps
+
+See [API-GAPS.md](./API-GAPS.md) for mock-only endpoints the UX needs that API-B2B-01 does not define (`GET /dashboard/summary`, `PUT /rules`, `GET /accounts/:id`, audit filters, optional health timestamps).
+
+## Screens
+
+`/login` · `/dashboard` · `/accounts` · `/accounts/[id]` · `/rules` · `/audit-log` · `/settings`

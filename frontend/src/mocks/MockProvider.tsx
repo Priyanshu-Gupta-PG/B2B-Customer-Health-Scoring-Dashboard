@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
+import { useCallback, useState, type ReactNode } from "react";
 import { env } from "@/lib/env";
+
+const MockBoot = dynamic(() => import("./MockBoot"), { ssr: false });
 
 /**
  * Starts the MSW service worker before rendering children so the first queries are
@@ -9,33 +12,20 @@ import { env } from "@/lib/env";
  */
 export function MockProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(!env.useMocks);
+  const onReady = useCallback(() => setReady(true), []);
 
-  useEffect(() => {
-    if (!env.useMocks) return;
-    let cancelled = false;
-    import("./browser")
-      .then(({ worker }) =>
-        worker.start({
-          onUnhandledRequest: "bypass",
-          quiet: true,
-          serviceWorker: { url: "/mockServiceWorker.js" },
-        }),
-      )
-      .catch((err) => console.error("[mocks] failed to start service worker", err))
-      .finally(() => {
-        if (!cancelled) setReady(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  if (!env.useMocks) return <>{children}</>;
 
-  if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-text-muted">
-        Starting mock API…
-      </div>
-    );
-  }
-  return <>{children}</>;
+  return (
+    <>
+      <MockBoot onReady={onReady} />
+      {ready ? (
+        children
+      ) : (
+        <div className="text-text-muted flex min-h-screen items-center justify-center text-sm">
+          Starting mock API…
+        </div>
+      )}
+    </>
+  );
 }

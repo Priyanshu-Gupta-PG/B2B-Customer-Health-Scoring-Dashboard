@@ -33,6 +33,8 @@ apiClient.interceptors.response.use(
       clearSession();
       const next = window.location.pathname + window.location.search;
       if (!window.location.pathname.startsWith("/login")) {
+        // Full navigation so in-memory Query/Auth state cannot outlive a dead token.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.assign(`/login?next=${encodeURIComponent(next)}&reason=expired`);
       }
     }
