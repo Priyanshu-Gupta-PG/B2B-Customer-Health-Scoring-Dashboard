@@ -11,10 +11,11 @@ import { SectionErrorBoundary } from "@/components/ui/SectionErrorBoundary";
 import { Skeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import { KpiCards } from "./KpiCards";
 import { TopAtRiskTable } from "./TopAtRiskTable";
+import { errorMessage } from "@/lib/errors";
 import { useDashboardSummary } from "./hooks";
 
 export function DashboardScreen() {
-  const { data, isLoading, isError, isFetching, isRefetching, dataUpdatedAt, refetch } =
+  const { data, error, isLoading, isError, isFetching, isRefetching, dataUpdatedAt, refetch } =
     useDashboardSummary();
   const highlight = useDataFlash(dataUpdatedAt, Boolean(data) && !isLoading);
 
@@ -30,7 +31,8 @@ export function DashboardScreen() {
       {isError && !data ? (
         <Card>
           <ErrorState
-            title="Unable to fetch scores — Database unreachable"
+            title={errorMessage(error, "Unable to fetch scores")}
+            description="Leave the backend Terminal running (express api listening) and confirm http://localhost:4000/health shows postgres connected."
             onRetry={() => {
               void refetch();
             }}
