@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String?
+  role         String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("admin_users")
+}
+
+model Account {
+  id            String           @id @default(uuid())
+  companyName   String           @unique @map("company_name")
+  domain        String
+  plan          String
+  ownerCsm      String           @map("owner_csm")
+  arr           Int
+  currentScore  Int              @default(100) @map("current_score")
+  healthStatus  String           @default("Healthy") @map("health_status")
+  lastActiveAt  DateTime?        @map("last_active_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  metrics       AccountMetric[]
+  snapshots     ScoreSnapshot[]
+
+  @@index([healthStatus])
+  @@index([currentScore])
+  @@map("accounts")
+}
+
+model ScoringRule {
+  id                String   @id @default(uuid())
+  metricName        String   @unique @map("metric_name")
+  weightPercentage  Int      @map("weight_percentage")
+  impactDirection   String   @map("impact_direction")
+  threshold         Int?
+  isActive          Boolean  @default(true) @map("is_active")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("scoring_rules")
+}
+
+model AccountMetric {
+  id          String   @id @default(uuid())
+  accountId   String   @map("account_id")
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  sourceApi   String   @map("source_api")
+  metricType  String   @map("metric_type")
+  metricValue Decimal  @map("metric_value") @db.Decimal(12, 2)
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+
+  @@unique([accountId, metricType])
+  @@map("account_metrics")
+}
+
+model ScoreSnapshot {
+  id               String   @id @default(uuid())
+  accountId        String   @map("account_id")
+  account          Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  calculatedScore  Int      @map("calculated_score")
+  healthStatus     String   @map("health_status")
+  recordedAt       DateTime @default(now()) @map("recorded_at")
+
+  @@index([accountId, recordedAt(sort: Desc)])
+  @@map("score_snapshots")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorId     String   @map("actor_id")
+  actorEmail  String   @map("actor_email")
+  action      String
+  metricName  String?  @map("metric_name")
+  beforeState Json?    @map("before_state")
+  afterState  Json?    @map("after_state")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@index([actorEmail])
+  @@map("audit_logs")
+}
+
+model JobLock {
+  name     String   @id
+  lockedAt DateTime @map("locked_at")
+
+  @@map("job_locks")
+}
+
+model SystemState {
+  id              String    @id @default("singleton")
+  lastIngestionAt DateTime? @map("last_ingestion_at")
+  cronStatus      String    @default("idle") @map("cron_status")
+
+  @@map("system_state")
+}

@@ -1,0 +1,61 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { generateKeyPairSync } from "node:crypto";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const here = dirname(fileURLToPath(import.meta.url));
+const backendRoot = join(here, "../..");
+
+function unescapePem(value: string) {
+  return value.replace(/\\n/g, "\n");
+}
+
+function loadOrCreateDevKeys() {
+  const envPriv = process.env.JWT_PRIVATE_KEY;
+  const envPub = process.env.JWT_PUBLIC_KEY;
+  if (envPriv && envPub) {
+    return { privateKey: unescapePem(envPriv), publicKey: unescapePem(envPub) };
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_PRIVATE_KEY and JWT_PUBLIC_KEY are required in production.");
+  }
+
+  const dir = join(backendRoot, ".dev-keys");
+  const privPath = join(dir, "jwt-private.pem");
+  const pubPath = join(dir, "jwt-public.pem");
+  if (existsSync(privPath) && existsSync(pubPath)) {
+    return { privateKey: readFileSync(privPath, "utf8"), publicKey: readFileSync(pubPath, "utf8") };
+  }
+
+  mkdirSync(dir, { recursive: true });
+  const pair = generateKeyPairSync("rsa", { modulusLength: 2048 });
+  const privateKey = pair.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+  const publicKey = pair.publicKey.export({ type: "spki", format: "pem" }).toString();
+  writeFileSync(privPath, privateKey);
+  writeFileSync(pubPath, publicKey);
+  return { privateKey, publicKey };
+}
+
+const keys = loadOrCreateDevKeys();
+
+export const config = {
+  port: Number(process.env.PORT ?? 4000),
+  nodeEnv: process.env.NODE_ENV ?? "development",
+  databaseUrl: process.env.DATABASE_URL ?? "",
+  frontendOrigin: process.env.FRONTEND_ORIGIN ?? "http://localhost:3000",
+  bcryptCost: Number(process.env.BCRYPT_COST ?? 12),
+  ingestCron: process.env.INGEST_CRON ?? "*/15 * * * *",
+  snapshotCron: process.env.SNAPSHOT_CRON ?? "0 0 * * *",
+  seedAccountCount: Number(process.env.SEED_ACCOUNT_COUNT ?? 150),
+  jwt: {
+    privateKey: keys.privateKey,
+    publicKey: keys.publicKey,
+    expiresIn: "24h" as const,
+  },
+};
+
+export const startedAt = Date.now();
