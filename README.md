@@ -1,2 +1,65 @@
-# B2B-Customer-Health-Scoring-Dashboard
-Build the most actionable, automated Customer Success platform in the Node.js/Next.js ecosystem — one that centralizes fragmented client data to give Customer Success Managers an exact, real-time pulse on account health and eliminates revenue churn before it happens.
+# B2B Customer Health Scoring Dashboard
+
+Internal Customer Success console: deterministic 0–100 health scores from billing, support, and product usage.
+
+## Layout
+
+```
+frontend/   Next.js dashboard (MSW mocks or live API)
+backend/    Express + Prisma + node-cron
+docker-compose.yml   PostgreSQL 15
+```
+
+## Quick start
+
+Your Terminal must be inside the cloned repo (the folder that contains `frontend/` and `backend/`).
+If the prompt is only `~`, you are in your home folder — `cd backend` and `npm ci` will fail.
+
+```bash
+cd ~/Projects/B2B-Customer-Health-Scoring-Dashboard
+ls frontend backend
+```
+
+### 1. PostgreSQL (pick one)
+
+**Docker Desktop** — only if `docker` works:
+
+```bash
+docker compose up -d postgres
+```
+
+**Homebrew** — use this when Terminal says `command not found: docker`:
+
+```bash
+brew install postgresql@15
+brew services start postgresql@15
+export PATH="$(brew --prefix postgresql@15)/bin:$PATH"
+createuser health_user || true
+createdb -O health_user health_db || true
+psql -d postgres -c "ALTER USER health_user WITH PASSWORD 'health_password';"
+psql -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE health_db TO health_user;"
+```
+
+### 2. API
+
+```bash
+bash backend/dev.sh
+```
+
+### 3. UI (second terminal)
+
+```bash
+cd ~/Projects/B2B-Customer-Health-Scoring-Dashboard/frontend
+cp .env.example .env.local
+# set NEXT_PUBLIC_USE_MOCKS=false to talk to Express
+npm ci
+npm run dev
+```
+
+- UI: http://localhost:3000  
+- API: http://localhost:4000/api/v1  
+- Health: http://localhost:4000/health  
+
+Demo users: `admin@company.com` / `Admin123!` and `csm@company.com` / `Csm12345!`.
+
+With `NEXT_PUBLIC_USE_MOCKS=true` the frontend runs without the API.
