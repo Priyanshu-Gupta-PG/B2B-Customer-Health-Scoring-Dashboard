@@ -16,7 +16,18 @@ export function createApp() {
   const app = express();
   app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
   if (process.env.NODE_ENV !== "test") {
-    app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === "/health" } }));
+    app.use(
+      pinoHttp({
+        logger,
+        autoLogging: { ignore: (req) => req.url === "/health" },
+        customSuccessMessage: (req, res) => `${req.method} ${req.originalUrl} ${res.statusCode}`,
+        customErrorMessage: (req, res, err) => `${req.method} ${req.originalUrl} ${res.statusCode} ${err.message}`,
+        serializers: {
+          req: (req) => ({ method: req.method, url: req.url }),
+          res: (res) => ({ statusCode: res.statusCode }),
+        },
+      }),
+    );
   }
   app.use(
     cors({
