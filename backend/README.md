@@ -5,11 +5,19 @@ Express + Prisma API for the B2B Customer Health Scoring Dashboard. Matches the 
 ## Prerequisites
 
 - Node.js 20+
-- Docker Desktop (for PostgreSQL)
+- PostgreSQL 15 — Docker Desktop **or** `brew install postgresql@15`
+
+`docker` is not required. If Terminal says `command not found: docker`, use Homebrew Postgres (see the root README).
 
 ## Run locally
 
-From the **repo root**:
+Always `cd` into the cloned repo first (not `~`). Then either:
+
+```bash
+bash backend/dev.sh
+```
+
+Or, from the **repo root**:
 
 ```bash
 # API + Postgres together

@@ -12,21 +12,44 @@ docker-compose.yml   PostgreSQL 15
 
 ## Quick start
 
+Your Terminal must be inside the cloned repo (the folder that contains `frontend/` and `backend/`).
+If the prompt is only `~`, you are in your home folder — `cd backend` and `npm ci` will fail.
+
 ```bash
-# 1. Database
+cd ~/Projects/B2B-Customer-Health-Scoring-Dashboard
+ls frontend backend
+```
+
+### 1. PostgreSQL (pick one)
+
+**Docker Desktop** — only if `docker` works:
+
+```bash
 docker compose up -d postgres
+```
 
-# 2. API
-cd backend
-cp .env.example .env
-npm ci
-npx prisma generate
-npx prisma migrate deploy
-npm run db:seed
-npm run dev
+**Homebrew** — use this when Terminal says `command not found: docker`:
 
-# 3. UI (second terminal)
-cd frontend
+```bash
+brew install postgresql@15
+brew services start postgresql@15
+export PATH="$(brew --prefix postgresql@15)/bin:$PATH"
+createuser health_user || true
+createdb -O health_user health_db || true
+psql -d postgres -c "ALTER USER health_user WITH PASSWORD 'health_password';"
+psql -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE health_db TO health_user;"
+```
+
+### 2. API
+
+```bash
+bash backend/dev.sh
+```
+
+### 3. UI (second terminal)
+
+```bash
+cd ~/Projects/B2B-Customer-Health-Scoring-Dashboard/frontend
 cp .env.example .env.local
 # set NEXT_PUBLIC_USE_MOCKS=false to talk to Express
 npm ci
