@@ -31,7 +31,22 @@ export function createApp() {
   }
   app.use(
     cors({
-      origin: config.frontendOrigin,
+      origin(origin, callback) {
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        const allowed = new Set([
+          config.frontendOrigin,
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "http://127.0.0.1:3000",
+          "http://127.0.0.1:3001",
+        ]);
+        const localDev =
+          config.nodeEnv !== "production" && /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+        callback(null, allowed.has(origin) || localDev);
+      },
       credentials: true,
     }),
   );
