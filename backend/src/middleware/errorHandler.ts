@@ -26,19 +26,19 @@ export function problem(res: Response, status: number, title: string, detail: st
 export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   if (err instanceof ZodError) {
     const detail = err.issues.map((i) => i.message).join("; ") || "Validation failed.";
-    problem(res, 422, "Validation Error", detail, req.path);
+    problem(res, 422, "Validation Error", detail, req.originalUrl.split("?")[0]);
     return;
   }
   if (err instanceof HttpError) {
-    problem(res, err.status, err.title, err.message, req.path);
+    problem(res, err.status, err.title, err.message, req.originalUrl.split("?")[0]);
     return;
   }
   if (err instanceof SyntaxError && "body" in err) {
-    problem(res, 400, "Bad Request", "Request body must be valid JSON.", req.path);
+    problem(res, 400, "Bad Request", "Request body must be valid JSON.", req.originalUrl.split("?")[0]);
     return;
   }
-  logger.error({ err, path: req.path }, "unhandled error");
-  problem(res, 500, "Internal Server Error", "An unexpected error occurred.", req.path);
+  logger.error({ err, path: req.originalUrl }, "unhandled error");
+  problem(res, 500, "Internal Server Error", "An unexpected error occurred.", req.originalUrl.split("?")[0]);
 };
 
 export function notFound(_req: Request, res: Response) {

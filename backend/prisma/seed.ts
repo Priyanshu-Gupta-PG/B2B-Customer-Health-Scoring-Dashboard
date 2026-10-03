@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { ScoringCalculator, METRIC_NORMALISERS } from "../src/engine/ScoringCalculator.js";
+
+dotenv.config();
 
 const prisma = new PrismaClient();
 

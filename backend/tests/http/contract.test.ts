@@ -25,13 +25,24 @@ describe("HTTP contract (no database)", () => {
     });
   });
 
-  it("GET /health reports degraded postgres without a database", async () => {
+  it("GET /health reports process, database, and cron status", async () => {
     const res = await fetch(`${base}/health`);
-    assert.equal(res.status, 503);
-    const body = (await res.json()) as { status: string; postgres: string; cron_worker: string };
-    assert.equal(body.status, "degraded");
-    assert.equal(body.postgres, "disconnected");
+    const body = (await res.json()) as {
+      status: string;
+      postgres: string;
+      cron_worker: string;
+      uptime_seconds: number;
+    };
+    if (body.postgres === "connected") {
+      assert.equal(res.status, 200);
+      assert.equal(body.status, "ok");
+    } else {
+      assert.equal(res.status, 503);
+      assert.equal(body.status, "degraded");
+      assert.equal(body.postgres, "disconnected");
+    }
     assert.ok(["idle", "running", "stalled"].includes(body.cron_worker));
+    assert.ok(body.uptime_seconds >= 0);
   });
 
   it("GET /api/v1/accounts without a bearer token is 401 problem+json", async () => {

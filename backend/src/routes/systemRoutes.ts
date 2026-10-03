@@ -13,7 +13,7 @@ ingestRouter.post("/trigger", requireAdmin, async (req, res, next) => {
   try {
     const result = await triggerManualIngest();
     if (result.already) {
-      problem(res, 409, "Conflict", "An ingestion job is already running.", req.path);
+      problem(res, 409, "Conflict", "An ingestion job is already running.", req.originalUrl.split("?")[0]);
       return;
     }
     await writeAudit(req.user!, "INGESTION_TRIGGERED", null, null, {

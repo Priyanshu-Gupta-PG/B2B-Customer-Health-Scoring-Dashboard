@@ -29,7 +29,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   const header = req.headers.authorization;
   const token = header?.startsWith("Bearer ") ? header.slice(7) : null;
   if (!token) {
-    problem(res, 401, "Unauthorized", "A valid bearer token is required.", req.path);
+    problem(res, 401, "Unauthorized", "A valid bearer token is required.", req.originalUrl.split("?")[0]);
     return;
   }
   try {
@@ -37,13 +37,13 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
     req.user = { id: payload.sub, email: payload.email, role: payload.role, name: payload.name };
     next();
   } catch {
-    problem(res, 401, "Unauthorized", "A valid bearer token is required.", req.path);
+    problem(res, 401, "Unauthorized", "A valid bearer token is required.", req.originalUrl.split("?")[0]);
   }
 }
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (req.user?.role !== "admin") {
-    problem(res, 403, "Forbidden", "Admin privileges required.", req.path);
+    problem(res, 403, "Forbidden", "Admin privileges required.", req.originalUrl.split("?")[0]);
     return;
   }
   next();
