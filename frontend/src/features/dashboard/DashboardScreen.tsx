@@ -32,7 +32,7 @@ export function DashboardScreen() {
         <Card>
           <ErrorState
             title={errorMessage(error, "Unable to fetch scores")}
-            description="Leave the backend Terminal running (express api listening) and confirm http://localhost:4000/health shows postgres connected."
+            message="Leave the backend Terminal running (express api listening) and confirm http://localhost:4000/health shows postgres connected."
             onRetry={() => {
               void refetch();
             }}
