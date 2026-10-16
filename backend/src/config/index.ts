@@ -48,6 +48,11 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL ?? "",
   frontendOrigin: process.env.FRONTEND_ORIGIN ?? "http://localhost:3000",
   bcryptCost: Number(process.env.BCRYPT_COST ?? 12),
+  googleClientId: process.env.GOOGLE_CLIENT_ID?.trim() ?? "",
+  googleAdminEmails: (process.env.GOOGLE_ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
   ingestCron: process.env.INGEST_CRON ?? "*/15 * * * *",
   snapshotCron: process.env.SNAPSHOT_CRON ?? "0 0 * * *",
   seedAccountCount: Number(process.env.SEED_ACCOUNT_COUNT ?? 150),

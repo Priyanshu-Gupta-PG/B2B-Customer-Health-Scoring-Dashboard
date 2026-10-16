@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Logo } from "@/components/layout/Logo";
-import { LoginForm } from "@/features/auth/LoginForm";
+import { GoogleSignUp } from "@/features/auth/GoogleSignUp";
 import { LoginRedirect } from "@/features/auth/LoginRedirect";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = { title: "Sign up" };
 
 export default function LoginPage() {
   return (
@@ -50,12 +50,14 @@ export default function LoginPage() {
           <div className="mb-8 lg:hidden">
             <Logo />
           </div>
-          <h1 className="text-2xl font-semibold text-text">Sign in</h1>
-          <p className="mt-1 text-sm text-text-muted">Use your Customer Success workspace credentials.</p>
+          <h1 className="text-2xl font-semibold text-text">Sign up</h1>
+          <p className="mt-1 text-sm text-text-muted">
+            Use your Google account. The first person to sign up becomes the administrator.
+          </p>
           <div className="mt-8">
             <Suspense fallback={null}>
               <LoginRedirect />
-              <LoginForm />
+              <GoogleSignUp />
             </Suspense>
           </div>
         </div>

@@ -46,7 +46,7 @@ Base path is `/api/v1` unless noted. Auth is `Authorization: Bearer <jwt>` excep
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| `POST` | `/api/v1/auth/login` | Seed users below |
+| `POST` | `/api/v1/auth/google` | `{ id_token }` from Google Identity Services. Creates the user on first sign-up. |
 | `GET` | `/api/v1/accounts` | `status`, `search`, `limit`, `offset`. UI currently fetches `limit=500` and filters client-side. |
 | `GET` | `/api/v1/accounts/:id/history` | `days` 1–90 (UI uses 7 / 30 / 90) |
 | `GET` | `/api/v1/rules` | `{ data: ScoringRule[] }` |
@@ -59,8 +59,8 @@ Base path is `/api/v1` unless noted. Auth is `Authorization: Bearer <jwt>` excep
 
 No additional HTTP paths exist beyond the tables above. Mock-only **behavior** worth knowing:
 
-- Login seed users (not part of the API spec): `admin@company.com` / `Admin123!` and `csm@company.com` / `Csm12345!`.
-- JWT is a base64 JSON blob, not a signed token.
+- Sign-up is Google only. Password login has been removed.
+- Session JWTs issued by the API are RS256. Mock request handlers accept the payload of that token so the rest of the UI can still run against MSW.
 - Manual ingest mutates ~20% of accounts after ~3.5s and writes an `INGESTION_TRIGGERED` audit row.
 - Bulk rule save writes `RULES_BULK_UPDATED` (and related) audit actions. Spec only names per-rule updates.
 - RFC 7807 `application/problem+json` bodies on 4xx.

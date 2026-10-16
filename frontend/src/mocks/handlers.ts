@@ -4,7 +4,6 @@ import type {
   AuthUser,
   BulkUpdateRulesRequest,
   HealthStatus,
-  LoginRequest,
   ProblemDetails,
   UpdateRuleRequest,
 } from "@/types/api";
@@ -51,19 +50,7 @@ const isUser = (v: AuthUser | Response): v is AuthUser => !(v instanceof Respons
 const VALID_STATUS: HealthStatus[] = ["Critical", "At-Risk", "Healthy"];
 
 export const handlers = [
-  // ---------- Auth ----------
-  http.post(`${API}/auth/login`, async ({ request }) => {
-    await jitter();
-    const body = (await request.json().catch(() => null)) as LoginRequest | null;
-    if (!body?.email || !body?.password) {
-      return problem(422, "Validation Error", "Email and password are required.", "/api/v1/auth/login");
-    }
-    const session = mockDb().login(body.email, body.password);
-    if (!session) {
-      return problem(401, "Invalid credentials", "Email or password is incorrect.", "/api/v1/auth/login");
-    }
-    return HttpResponse.json(session);
-  }),
+  // Google sign-up is not mocked. POST /auth/google reaches the Express API.
 
   // ---------- Accounts ----------
   http.get(`${API}/accounts`, async ({ request }) => {

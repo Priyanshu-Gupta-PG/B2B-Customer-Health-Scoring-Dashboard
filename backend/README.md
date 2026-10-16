@@ -37,12 +37,9 @@ npm run dev
 API: [http://localhost:4000](http://localhost:4000)  
 Health: [http://localhost:4000/health](http://localhost:4000/health)
 
-Seed users (same as the frontend mocks):
+Sign-up is Google only. There is no email/password account form.
 
-| Role | Email | Password |
-|------|--------|----------|
-| Administrator | `admin@company.com` | `Admin123!` |
-| CSM | `csm@company.com` | `Csm12345!` |
+Set `GOOGLE_CLIENT_ID` to the same OAuth client ID as `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. The first Google account becomes the administrator. Later accounts are read-only unless their email is listed in `GOOGLE_ADMIN_EMAILS` (comma-separated).
 
 Point the frontend at this API:
 
@@ -67,4 +64,4 @@ npm run db:seed
 - Daily midnight score snapshots for Recharts
 - Manual `POST /api/v1/ingest/trigger` (admin JWT)
 
-Auth is RS256 JWT. In development, keys are created in `backend/.dev-keys/` on first start.
+Auth is a Google ID token exchanged for an RS256 session JWT. In development, keys are created in `backend/.dev-keys/` on first start.

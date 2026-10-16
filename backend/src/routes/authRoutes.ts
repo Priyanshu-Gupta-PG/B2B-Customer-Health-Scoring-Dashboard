@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
-import { login } from "../services/AuthService.js";
+import { loginWithGoogle } from "../services/AuthService.js";
+import { HttpError } from "../middleware/errorHandler.js";
 
 export const authRouter = Router();
 
@@ -12,15 +13,18 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+const googleSchema = z.object({
+  id_token: z.string().min(1, "Google credential is required."),
 });
 
-authRouter.post("/login", limiter, async (req, res, next) => {
+authRouter.all("/login", (_req, _res, next) => {
+  next(new HttpError(404, "Not Found", "Email and password sign-in has been removed. Use Google sign-up."));
+});
+
+authRouter.post("/google", limiter, async (req, res, next) => {
   try {
-    const body = loginSchema.parse(req.body);
-    const result = await login(body.email, body.password);
+    const body = googleSchema.parse(req.body);
+    const result = await loginWithGoogle(body.id_token);
     res.json(result);
   } catch (err) {
     next(err);

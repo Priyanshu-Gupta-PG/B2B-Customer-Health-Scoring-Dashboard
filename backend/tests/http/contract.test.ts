@@ -53,8 +53,19 @@ describe("HTTP contract (no database)", () => {
     assert.equal(body.title, "Unauthorized");
   });
 
-  it("POST /api/v1/auth/login rejects an empty body", async () => {
+  it("POST /api/v1/auth/login is no longer available", async () => {
     const res = await fetch(`${base}/api/v1/auth/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: "admin@company.com", password: "Admin123!" }),
+    });
+    assert.equal(res.status, 404);
+    const body = (await res.json()) as { detail: string };
+    assert.match(body.detail, /Google sign-up/);
+  });
+
+  it("POST /api/v1/auth/google rejects an empty body", async () => {
+    const res = await fetch(`${base}/api/v1/auth/google`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({}),
@@ -62,6 +73,18 @@ describe("HTTP contract (no database)", () => {
     assert.equal(res.status, 422);
     const body = (await res.json()) as { title: string };
     assert.equal(body.title, "Validation Error");
+  });
+
+  it("POST /api/v1/auth/google reports missing Google configuration", async () => {
+    const res = await fetch(`${base}/api/v1/auth/google`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id_token: "not-a-real-google-token" }),
+    });
+    assert.equal(res.status, 503);
+    const body = (await res.json()) as { title: string; detail: string };
+    assert.equal(body.title, "Service Unavailable");
+    assert.match(body.detail, /not configured/);
   });
 
   it("unknown routes return RFC 7807 404", async () => {

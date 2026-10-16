@@ -27,14 +27,9 @@ Copy `.env.example` to `.env.local`. All variables are public (`NEXT_PUBLIC_*`) 
 | `NEXT_PUBLIC_API_URL` | `http://localhost:4000/api/v1` | Express API base. `GET /health` is called on the origin of this URL. |
 | `NEXT_PUBLIC_USE_MOCKS` | `true` in `.env.example` | `true` starts the MSW worker and intercepts `/api/v1` + `/health`. Set `false` once Express is running. |
 
-### Demo credentials (MSW only)
+### Google sign-up
 
-From `src/mocks/db.ts`, shown on the login form when mocks are on:
-
-| Role | Email | Password |
-| --- | --- | --- |
-| Administrator | `admin@company.com` | `Admin123!` |
-| CSM (read-only) | `csm@company.com` | `Csm12345!` |
+Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` to the same OAuth client ID as the API's `GOOGLE_CLIENT_ID`. The sign-up page has no email or password form. The first Google account is the administrator. Later accounts are read-only unless listed in `GOOGLE_ADMIN_EMAILS`.
 
 Admin can edit scoring weights and trigger ingestion. CSM can view every screen but cannot save rules or run ingest.
 
@@ -56,6 +51,7 @@ npm start            # next start (after build)
 docker build -t health-dashboard-frontend \
   --build-arg NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1 \
   --build-arg NEXT_PUBLIC_USE_MOCKS=false \
+  --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com \
   .
 docker run --rm -p 3000:3000 health-dashboard-frontend
 ```

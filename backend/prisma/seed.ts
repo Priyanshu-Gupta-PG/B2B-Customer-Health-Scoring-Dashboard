@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { ScoringCalculator, METRIC_NORMALISERS } from "../src/engine/ScoringCalculator.js";
@@ -68,8 +67,6 @@ function scoreOf(raw: Record<string, number>, rules: Rule[]) {
 async function main() {
   const rand = mulberry32(20260903);
   const count = Number(process.env.SEED_ACCOUNT_COUNT ?? 150);
-  const adminHash = await bcrypt.hash("Admin123!", 12);
-  const csmHash = await bcrypt.hash("Csm12345!", 12);
 
   await prisma.auditLog.deleteMany();
   await prisma.scoreSnapshot.deleteMany();
@@ -84,14 +81,12 @@ async function main() {
       {
         id: "550e8400-e29b-41d4-a716-446655440000",
         email: "admin@company.com",
-        passwordHash: adminHash,
         role: "admin",
         name: "David Chen",
       },
       {
         id: "550e8400-e29b-41d4-a716-446655440001",
         email: "csm@company.com",
-        passwordHash: csmHash,
         role: "csm",
         name: "Sarah Lopez",
       },

@@ -60,6 +60,6 @@ npm run dev
 - API: http://localhost:4000/api/v1  
 - Health: http://localhost:4000/health  
 
-Demo users: `admin@company.com` / `Admin123!` and `csm@company.com` / `Csm12345!`.
+Sign-up is Google only. Set `GOOGLE_CLIENT_ID` on the API and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` on the UI to the same Google OAuth client ID. The first Google account becomes the administrator. Add more administrators with `GOOGLE_ADMIN_EMAILS`.
 
-With `NEXT_PUBLIC_USE_MOCKS=true` the frontend runs without the API.
+With `NEXT_PUBLIC_USE_MOCKS=true` the frontend still loads portfolio data from mocks, but Google sign-up calls the API.

@@ -12,7 +12,6 @@ import type {
   DashboardSummary,
   HealthResponse,
   HealthStatus,
-  LoginResponse,
   MetricName,
   Paginated,
   ScoringRule,
@@ -45,18 +44,16 @@ interface PersistedState {
   rawOverrides: Record<string, Partial<Record<MetricName, number>>>;
 }
 
-export const MOCK_USERS: Array<AuthUser & { password: string }> = [
+export const MOCK_USERS: AuthUser[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440000",
     email: "admin@company.com",
-    password: "Admin123!",
     role: "admin",
     name: "David Chen",
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440001",
     email: "csm@company.com",
-    password: "Csm12345!",
     role: "csm",
     name: "Sarah Lopez",
   },
@@ -190,34 +187,24 @@ class MockDb {
 
   // ---------- auth ----------
 
-  login(email: string, password: string): LoginResponse | null {
-    const user = MOCK_USERS.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password,
-    );
-    if (!user) return null;
-    const expires = new Date(Date.now() + 24 * 3600 * 1000);
-    const payload = btoa(
-      JSON.stringify({ sub: user.id, email: user.email, role: user.role, exp: expires.getTime() }),
-    );
-    return {
-      token: `mock.${payload}.sig`,
-      expires_at: expires.toISOString(),
-      user: { id: user.id, email: user.email, role: user.role, name: user.name },
-    };
-  }
-
   userFromToken(token: string | null): AuthUser | null {
-    if (!token || !token.startsWith("mock.")) return null;
+    if (!token) return null;
     try {
-      const payload = JSON.parse(atob(token.split(".")[1])) as {
+      const parts = token.split(".");
+      if (parts.length < 2) return null;
+      const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+      const payload = JSON.parse(atob(padded)) as {
         sub: string;
         email: string;
         role: AuthUser["role"];
+        name?: string;
         exp: number;
       };
-      if (payload.exp <= Date.now()) return null;
-      const user = MOCK_USERS.find((u) => u.id === payload.sub);
-      return user ? { id: user.id, email: user.email, role: user.role, name: user.name } : null;
+      const expMs = payload.exp > 10_000_000_000 ? payload.exp : payload.exp * 1000;
+      if (!payload.sub || !payload.email || expMs <= Date.now()) return null;
+      if (payload.role !== "admin" && payload.role !== "csm") return null;
+      return { id: payload.sub, email: payload.email, role: payload.role, name: payload.name };
     } catch {
       return null;
     }

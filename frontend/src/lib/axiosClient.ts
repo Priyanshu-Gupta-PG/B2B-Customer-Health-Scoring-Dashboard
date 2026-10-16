@@ -28,7 +28,7 @@ apiClient.interceptors.response.use(
   (error) => {
     const apiError = toApiError(error);
     const isLoginCall =
-      axios.isAxiosError(error) && (error.config?.url ?? "").includes("/auth/login");
+      axios.isAxiosError(error) && (error.config?.url ?? "").includes("/auth/google");
     if (apiError.status === 401 && !isLoginCall && typeof window !== "undefined") {
       clearSession();
       const next = window.location.pathname + window.location.search;
