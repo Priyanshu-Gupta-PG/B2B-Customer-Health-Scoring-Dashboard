@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ClipboardList } from "lucide-react";
+import { ArrowRight, ClipboardList } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -21,14 +21,14 @@ const PAGE_SIZE = 25;
 
 const ACTION_LABEL: Record<AuditAction, string> = {
   RULE_UPDATED: "Updated scoring rule",
-  RULES_BULK_UPDATED: "Bulk updated scoring rules",
-  RECALCULATION_RUN: "Recalculated scores",
-  INGESTION_TRIGGERED: "Triggered data ingestion",
+  RULES_BULK_UPDATED: "Bulk calibrated scoring rules",
+  RECALCULATION_RUN: "Batch score recalculation executed",
+  INGESTION_TRIGGERED: "Triggered telemetry data ingestion",
 };
 
 function actionLabel(entry: AuditLogEntry) {
   if (entry.action === "RULE_UPDATED" && entry.metric_name) {
-    return `Updated ${metricLabel(entry.metric_name)}`;
+    return `Recalibrated ${metricLabel(entry.metric_name)}`;
   }
   return ACTION_LABEL[entry.action] ?? entry.action;
 }
@@ -78,19 +78,20 @@ export function AuditLogView() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
-        title="Audit Log"
-        description="History of scoring-rule changes and administrative actions."
+        title="Administrative Audit Trail"
+        description="Immutable governance log recording algorithm calibration, manual ingestion, and recalculation triggers."
       />
 
-      <Card>
-        <div className="border-border grid grid-cols-1 gap-3 border-b px-4 py-4 sm:grid-cols-2 sm:px-5 lg:flex lg:flex-row lg:items-end">
+      <Card className="animate-fade-in-up">
+        {/* Filter controls */}
+        <div className="border-b border-white/[0.06] bg-white/[0.01] grid grid-cols-1 gap-3 px-5 py-4 sm:grid-cols-2 lg:flex lg:flex-row lg:items-end">
           <div className="w-full lg:w-44">
             <Input
               id="audit-from"
               type="date"
-              label="From"
+              label="From Date"
               value={from}
               max={to || undefined}
               onChange={(e) => {
@@ -103,7 +104,7 @@ export function AuditLogView() {
             <Input
               id="audit-to"
               type="date"
-              label="To"
+              label="To Date"
               value={to}
               min={from || undefined}
               onChange={(e) => {
@@ -115,7 +116,7 @@ export function AuditLogView() {
           <div className="w-full sm:col-span-2 lg:w-64">
             <Select
               id="audit-actor"
-              label="Admin user"
+              label="Admin Identity"
               value={actor}
               disabled={actors.isLoading}
               onChange={(e) => {
@@ -123,7 +124,7 @@ export function AuditLogView() {
                 resetPage();
               }}
             >
-              <option value="">All admins</option>
+              <option value="">All Administrators</option>
               {(actors.data ?? []).map((email) => (
                 <option key={email} value={email}>
                   {email}
@@ -133,7 +134,7 @@ export function AuditLogView() {
           </div>
           {hasFilters && (
             <Button variant="ghost" size="sm" className="w-fit lg:mb-0.5" onClick={clearFilters}>
-              Clear filters
+              Clear Filters
             </Button>
           )}
         </div>
@@ -150,16 +151,16 @@ export function AuditLogView() {
         ) : isEmpty ? (
           <EmptyState
             icon={<ClipboardList className="size-5" />}
-            title="No rule changes recorded yet."
+            title="No audit entries found"
             description={
               hasFilters
-                ? "No entries match the selected date range or admin user."
-                : "Weight edits and other admin actions will appear here."
+                ? "No log entries match the selected filters."
+                : "Administrative actions and scoring adjustments will be captured here."
             }
             action={
               hasFilters ? (
                 <Button variant="secondary" size="sm" onClick={clearFilters}>
-                  Clear filters
+                  Clear Filters
                 </Button>
               ) : undefined
             }
@@ -167,54 +168,72 @@ export function AuditLogView() {
         ) : (
           <SectionErrorBoundary title="Audit log table failed to render">
             <>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[40rem] text-left text-sm" aria-label="Audit log">
-                <thead className="border-border bg-surface-raised/40 text-text-muted border-b text-xs tracking-wide uppercase">
-                  <tr>
-                    <th scope="col" className="px-5 py-3 font-medium">
-                      Timestamp
-                    </th>
-                    <th scope="col" className="px-5 py-3 font-medium">
-                      Admin Actor
-                    </th>
-                    <th scope="col" className="px-5 py-3 font-medium">
-                      Action
-                    </th>
-                    <th scope="col" className="px-5 py-3 text-right font-medium">
-                      Old Weight
-                    </th>
-                    <th scope="col" className="px-5 py-3 text-right font-medium">
-                      New Weight
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-border divide-y">
-                  {rows.map((entry) => (
-                    <tr key={entry.id} className="hover:bg-surface-raised/40">
-                      <td className="num text-text px-5 py-3.5 whitespace-nowrap">
-                        {formatDateTime(entry.created_at)}
-                      </td>
-                      <td className="text-text px-5 py-3.5">{entry.actor.email}</td>
-                      <td className="text-text px-5 py-3.5">{actionLabel(entry)}</td>
-                      <td className="num text-text-muted px-5 py-3.5 text-right whitespace-nowrap">
-                        {formatWeight(weightFrom(entry.before_state))}
-                      </td>
-                      <td className="num text-text px-5 py-3.5 text-right whitespace-nowrap">
-                        {formatWeight(weightFrom(entry.after_state))}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[42rem] text-left text-sm" aria-label="Audit log">
+                  <thead className="border-b border-white/[0.06] bg-white/[0.02] text-text-muted text-[11px] tracking-wider uppercase">
+                    <tr>
+                      <th scope="col" className="px-5 py-3.5 font-medium">
+                        Timestamp
+                      </th>
+                      <th scope="col" className="px-5 py-3.5 font-medium">
+                        Admin Actor
+                      </th>
+                      <th scope="col" className="px-5 py-3.5 font-medium">
+                        Action Taken
+                      </th>
+                      <th scope="col" className="px-5 py-3.5 text-right font-medium">
+                        Prior State
+                      </th>
+                      <th scope="col" className="px-5 py-3.5 text-right font-medium">
+                        Applied State
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <Pagination
-              pageIndex={pageIndex}
-              pageCount={pageCount}
-              pageSize={PAGE_SIZE}
-              total={total}
-              onPageChange={setPageIndex}
-            />
-          </>
+                  </thead>
+                  <tbody className="divide-y divide-white/[0.04]">
+                    {rows.map((entry) => {
+                      const before = weightFrom(entry.before_state);
+                      const after = weightFrom(entry.after_state);
+                      const hasDelta = before != null && after != null;
+
+                      return (
+                        <tr key={entry.id} className="transition-colors hover:bg-white/[0.02]">
+                          <td className="num text-text-muted px-5 py-3.5 text-xs whitespace-nowrap">
+                            {formatDateTime(entry.created_at)}
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span className="inline-flex items-center gap-1.5 font-mono text-xs text-text">
+                              <span className="size-1.5 rounded-full bg-blue-400" />
+                              {entry.actor.email}
+                            </span>
+                          </td>
+                          <td className="text-text px-5 py-3.5 font-medium">
+                            {actionLabel(entry)}
+                          </td>
+                          <td className="num text-text-muted px-5 py-3.5 text-right whitespace-nowrap">
+                            {formatWeight(before)}
+                          </td>
+                          <td className="num text-text px-5 py-3.5 text-right whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1.5 justify-end">
+                              {hasDelta && <ArrowRight className="size-3 text-text-muted" />}
+                              <span className={hasDelta ? "text-blue-300 font-semibold" : ""}>
+                                {formatWeight(after)}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                pageIndex={pageIndex}
+                pageCount={pageCount}
+                pageSize={PAGE_SIZE}
+                total={total}
+                onPageChange={setPageIndex}
+              />
+            </>
           </SectionErrorBoundary>
         )}
       </Card>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
 import type { ScoringRule } from "@/types/api";
 import { metricLabel } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -46,6 +47,7 @@ export function EditScoringAlgorithmModal({
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<EditRulesFormValues>({
     resolver: zodResolver(editRulesSchema),
@@ -71,7 +73,7 @@ export function EditScoringAlgorithmModal({
           is_active: rule.is_active,
         })),
       });
-      toast.success("Scores recalculating. Dashboard will refresh.");
+      toast.success("Algorithm updated. Full portfolio scores are recalculating.");
       onClose();
     } catch (err) {
       setServerError(errorMessage(err, "Unable to update scoring rules."));
@@ -82,8 +84,8 @@ export function EditScoringAlgorithmModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Edit Scoring Algorithm"
-      description="Active metric weights must total exactly 100%. Saving triggers a batch recalculation."
+      title="Calibrate Scoring Algorithm"
+      description="Active metric weights must total exactly 100%. Saving triggers an atomic batch recalculation across all accounts."
       size="lg"
       footer={
         <>
@@ -95,8 +97,10 @@ export function EditScoringAlgorithmModal({
             form="edit-scoring-algorithm"
             loading={isSubmitting}
             disabled={totalInvalid}
+            className="gap-2"
           >
-            Save weights
+            <Sparkles className="size-4" />
+            <span>Save & Recalculate Portfolio</span>
           </Button>
         </>
       }
@@ -105,65 +109,114 @@ export function EditScoringAlgorithmModal({
         id="edit-scoring-algorithm"
         onSubmit={onSubmit}
         noValidate
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-5"
       >
         {serverError && <AlertBanner>{serverError}</AlertBanner>}
 
+        {/* Live Visual Allocation Bar */}
+        <div className="rounded-xl border border-white/[0.08] bg-surface-raised/40 p-4 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-semibold text-text">Weight Allocation Gauge</span>
+            <span className={cn("num font-bold", totalInvalid ? "text-rose-400" : "text-emerald-400")}>
+              {total}% / 100%
+            </span>
+          </div>
+          <div className="h-3 w-full overflow-hidden rounded-full bg-white/[0.06] flex">
+            {rules.map((rule, index) => {
+              const row = watched[index];
+              const weight = row?.is_active ? Number(row.weight_percentage) || 0 : 0;
+              const colors = [
+                "bg-blue-500",
+                "bg-amber-400",
+                "bg-emerald-500",
+                "bg-purple-500",
+              ];
+              return (
+                <div
+                  key={rule.id}
+                  className={`h-full transition-all duration-300 ${colors[index % colors.length]}`}
+                  style={{ width: `${Math.min(100, Math.max(0, weight))}%` }}
+                  title={`${metricLabel(rule.metric_name)}: ${weight}%`}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Metric Sliders List */}
         <div
           className={cn(
-            "overflow-hidden rounded-lg border",
-            totalInvalid ? "border-danger" : "border-border",
+            "overflow-hidden rounded-xl border transition-colors",
+            totalInvalid ? "border-rose-500/30" : "border-white/[0.08]",
           )}
         >
-          <div className="border-border bg-bg/40 text-text-muted hidden grid-cols-[1fr_6.5rem_4.5rem] gap-3 border-b px-4 py-2 text-[11px] tracking-wide uppercase sm:grid">
-            <span>Metric</span>
-            <span>Weight %</span>
-            <span className="text-right">Active</span>
-          </div>
-          <ul className="divide-border divide-y">
+          <ul className="divide-y divide-white/[0.06]">
             {rules.map((rule, index) => {
               const row = watched[index];
               const inactive = row ? !row.is_active : !rule.is_active;
+              const currentWeight = row ? Number(row.weight_percentage) || 0 : rule.weight_percentage;
+
               return (
                 <li
                   key={rule.id}
                   className={cn(
-                    "flex flex-col gap-3 px-4 py-3 sm:grid sm:grid-cols-[1fr_6.5rem_4.5rem] sm:items-center",
-                    inactive && "opacity-60",
+                    "flex flex-col gap-3 p-4 transition-all duration-200",
+                    inactive ? "opacity-40 bg-black/20" : "bg-white/[0.01]",
                   )}
                 >
                   <input type="hidden" {...register(`rules.${index}.id`)} />
-                  <div className="min-w-0">
-                    <p className="text-text text-sm font-medium">{metricLabel(rule.metric_name)}</p>
-                    <p className="text-text-muted mt-0.5 text-[11px]">
-                      {rule.impact_direction === "positive"
-                        ? "Higher value raises the score"
-                        : "Higher value lowers the score"}
-                    </p>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-text text-sm font-semibold">{metricLabel(rule.metric_name)}</p>
+                      <p className="text-text-muted text-[11px] mt-0.5">
+                        {rule.impact_direction === "positive"
+                          ? "Positive: Higher values increase score"
+                          : "Negative: Higher values decrease score"}
+                      </p>
+                    </div>
+
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <span className="text-xs text-text-muted">Enabled</span>
+                      <input
+                        type="checkbox"
+                        className="accent-blue-500 size-4 rounded cursor-pointer"
+                        {...register(`rules.${index}.is_active`)}
+                      />
+                    </label>
                   </div>
-                  <div className="flex items-center justify-between gap-3 sm:contents">
-                    <label className="text-text-muted flex min-w-0 flex-1 items-center gap-2 text-xs sm:block sm:flex-none">
-                      <span className="sm:hidden">Weight %</span>
+
+                  {/* Range Slider + Number Input synced */}
+                  <div className="flex items-center gap-4 pt-1">
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      disabled={inactive}
+                      value={currentWeight}
+                      onChange={(e) => {
+                        setValue(`rules.${index}.weight_percentage`, Number(e.target.value), {
+                          shouldValidate: true,
+                        });
+                      }}
+                      className="flex-1 accent-blue-500 cursor-pointer disabled:cursor-not-allowed"
+                    />
+                    <div className="w-20">
                       <Input
                         type="number"
                         inputMode="numeric"
                         min={0}
                         max={100}
                         step={1}
+                        disabled={inactive}
                         aria-label={`${metricLabel(rule.metric_name)} weight`}
                         error={errors.rules?.[index]?.weight_percentage?.message}
-                        className={cn("num flex-1 text-right sm:flex-none", totalInvalid && "border-danger")}
+                        className={cn("num text-right font-semibold", totalInvalid && "border-rose-500/40")}
                         {...register(`rules.${index}.weight_percentage`, { valueAsNumber: true })}
                       />
-                    </label>
-                    <label className="text-text-muted flex items-center justify-end gap-2 text-xs">
-                      <span className="sm:sr-only">Active</span>
-                      <input
-                        type="checkbox"
-                        className="accent-primary size-4"
-                        {...register(`rules.${index}.is_active`)}
-                      />
-                    </label>
+                    </div>
+                    <span className="text-xs font-medium text-text-muted">%</span>
                   </div>
                 </li>
               );
@@ -171,29 +224,34 @@ export function EditScoringAlgorithmModal({
           </ul>
         </div>
 
+        {/* Total Validation Status Banner */}
         <div
           role="status"
           aria-live="polite"
           className={cn(
-            "rounded-lg border px-4 py-3",
-            totalInvalid ? "border-danger bg-danger/10" : "border-success/30 bg-success/10",
+            "rounded-xl border p-4 transition-colors",
+            totalInvalid
+              ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+              : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
           )}
         >
           <div className="flex items-center justify-between gap-3">
-            <p className={cn("text-sm font-medium", totalInvalid ? "text-danger" : "text-success")}>
-              Active total
-            </p>
-            <p
-              className={cn(
-                "num text-sm font-semibold",
-                totalInvalid ? "text-danger" : "text-success",
+            <div className="flex items-center gap-2">
+              {totalInvalid ? (
+                <AlertCircle className="size-4 text-rose-400 shrink-0" />
+              ) : (
+                <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
               )}
-            >
-              {total}%
-            </p>
+              <p className="text-xs font-semibold">
+                {totalInvalid ? "Invalid Total Weight" : "Formula Constraint Satisfied"}
+              </p>
+            </div>
+            <p className="num text-sm font-bold">{total}%</p>
           </div>
           {totalInvalid && (
-            <p className="text-danger mt-1 text-xs">{totalError ?? TOTAL_WEIGHT_ERROR}</p>
+            <p className="mt-1 text-xs text-rose-300/90 pl-6">
+              {totalError ?? TOTAL_WEIGHT_ERROR}
+            </p>
           )}
         </div>
       </form>

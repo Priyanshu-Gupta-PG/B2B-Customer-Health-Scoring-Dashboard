@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { Calculator, Info, SlidersHorizontal } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -23,27 +23,47 @@ export function ScoringRulesScreen() {
   const total = activeWeightTotal(rules);
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
-        title="Scoring Rules"
-        description="Deterministic 0–100 health scores are a weighted sum of these metrics. Active weights must total exactly 100%."
+        title="Scoring Algorithm & Weights"
+        description="Deterministic 0–100 composite health score calculation. Active weights must sum to exactly 100%."
         actions={
           isAdmin ? (
             <Button
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto gap-2"
               onClick={() => setEditOpen(true)}
               disabled={isLoading || rules.length === 0}
             >
-              <SlidersHorizontal className="size-4" />
-              Edit Scoring Algorithm
+              <SlidersHorizontal className="size-3.5" />
+              <span>Calibrate Weights</span>
             </Button>
           ) : undefined
         }
       />
 
+      {/* Formula Explainer Card */}
+      <div className="rounded-xl border border-white/[0.08] bg-surface-raised/40 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in-up">
+        <div className="flex items-start gap-3.5">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+            <Calculator className="size-4" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-text">Deterministic Scoring Engine (SC-01)</p>
+            <p className="text-xs text-text-muted mt-0.5">
+              Each raw telemetry signal is normalized [0, 1] against benchmark denominators, multiplied by configured weight percentage, and summed.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 self-start md:self-auto rounded-lg border border-white/[0.08] bg-black/30 px-3 py-2 text-xs font-mono text-text-muted">
+          <span className="text-blue-300">Score</span> = <span className="text-text">Σ(Normalized × Weight)</span>
+        </div>
+      </div>
+
       {!isAdmin && (
-        <p className="text-text-muted mb-4 text-xs">
-          You have read-only access. Ask an administrator to change metric weights.
+        <p className="text-text-muted text-xs flex items-center gap-1.5 pl-1">
+          <Info className="size-3.5 text-text-subtle" />
+          You have read-only access. Administrator privileges are required to calibrate metric weights.
         </p>
       )}
 
@@ -57,11 +77,13 @@ export function ScoringRulesScreen() {
           />
         </Card>
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden animate-fade-in-up stagger-1">
           <CardHeader
-            title="Active metrics"
+            title="Configured Telemetry Signals"
             description={
-              isLoading ? "Loading current weights…" : `${activeCount} active · ${total}% allocated`
+              isLoading
+                ? "Fetching current weights from engine…"
+                : `${activeCount} active signals · ${total}% allocated`
             }
           />
           <SectionErrorBoundary title="Scoring rules table failed to render">

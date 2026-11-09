@@ -17,7 +17,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={inputId} className="text-xs font-medium text-text-muted">
+        <label htmlFor={inputId} className="text-xs font-medium text-text-muted select-none">
           {label}
         </label>
       )}
@@ -33,8 +33,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
           className={cn(
-            "h-10 w-full rounded-lg border bg-bg px-3 text-sm text-text placeholder:text-text-muted/70 focus:outline-none focus:ring-2 disabled:opacity-60",
-            error ? "border-danger focus:ring-danger/40" : "border-border focus:border-primary focus:ring-primary/30",
+            "h-9 w-full rounded-lg border bg-surface-raised/50 px-3 text-xs text-text placeholder:text-text-subtle transition-all duration-150 focus:outline-none focus:ring-2 disabled:opacity-50",
+            error
+              ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
+              : "border-white/[0.08] focus:border-blue-500/50 focus:ring-blue-500/20 hover:border-white/[0.14]",
             leading && "pl-9",
             trailing && "pr-9",
             className,
@@ -44,7 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         {trailing && <span className="absolute inset-y-0 right-3 flex items-center text-text-muted">{trailing}</span>}
       </div>
       {error ? (
-        <p id={`${inputId}-error`} className="text-xs text-danger">
+        <p id={`${inputId}-error`} className="text-xs text-rose-400">
           {error}
         </p>
       ) : hint ? (

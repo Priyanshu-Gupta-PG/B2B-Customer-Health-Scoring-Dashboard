@@ -1,58 +1,82 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Activity, Clock, TrendingUp } from "lucide-react";
 import { Logo } from "@/components/layout/Logo";
 import { LoginForm } from "@/features/auth/LoginForm";
 import { LoginRedirect } from "@/features/auth/LoginRedirect";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = { title: "Sign in · PulseScore" };
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen">
-      {/* Brand panel */}
-      <aside className="relative hidden w-1/2 flex-col justify-between overflow-hidden border-r border-border bg-surface p-10 lg:flex">
+    <div className="flex min-h-screen selection:bg-blue-500/20">
+      {/* Brand & Editorial Showcase Panel */}
+      <aside className="relative hidden w-1/2 flex-col justify-between overflow-hidden border-r border-white/[0.08] bg-surface/90 p-12 lg:flex">
+        {/* Ambient soft glow orbs */}
         <div
-          className="pointer-events-none absolute -right-32 -top-32 size-[28rem] rounded-full bg-primary/20 blur-3xl"
+          className="pointer-events-none absolute -right-28 -top-28 size-96 rounded-full bg-blue-600/10 blur-3xl"
           aria-hidden
         />
         <div
-          className="pointer-events-none absolute -bottom-40 -left-20 size-[26rem] rounded-full bg-success/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-36 -left-20 size-96 rounded-full bg-emerald-600/08 blur-3xl"
           aria-hidden
         />
-        <Logo />
-        <div className="relative max-w-md">
-          <h2 className="text-3xl font-semibold leading-tight text-text">
-            Know which accounts need you <span className="text-blue-300">today</span>.
+
+        <div className="relative z-10">
+          <Logo />
+        </div>
+
+        <div className="relative z-10 max-w-lg space-y-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-xs text-text-muted backdrop-blur-md">
+            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Autonomous Risk Intelligence Engine</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-[1.15] text-text">
+            Know exactly which accounts require intervention <span className="text-blue-400">before</span> churn occurs.
           </h2>
-          <p className="mt-4 text-sm leading-relaxed text-text-muted">
-            Billing, support and product usage are combined into a deterministic 0–100 health score every 15
-            minutes, so Customer Success can act before churn happens.
+
+          <p className="text-sm leading-relaxed text-text-muted">
+            Continuous ingestion from Stripe, Zendesk, and product telemetry delivers a deterministic 0–100 health composite every 15 minutes, empowering Customer Success teams to protect enterprise ARR.
           </p>
-          <dl className="mt-8 grid grid-cols-3 gap-4">
+
+          <dl className="grid grid-cols-3 gap-3.5 pt-2">
             {[
-              ["0–100", "Health score"],
-              ["15 min", "Data sync cadence"],
-              ["90 days", "Trend history"],
-            ].map(([v, l]) => (
-              <div key={l} className="rounded-lg border border-border bg-bg/60 p-3">
-                <dt className="num text-lg font-semibold text-text">{v}</dt>
-                <dd className="text-[11px] uppercase tracking-wide text-text-muted">{l}</dd>
+              { val: "0–100", label: "Composite Score", icon: Activity },
+              { val: "15 min", label: "Sync Interval", icon: Clock },
+              { val: "90 days", label: "Audit Trajectory", icon: TrendingUp },
+            ].map(({ val, label, icon: Icon }) => (
+              <div
+                key={label}
+                className="card-premium rounded-xl p-3.5 transition-transform duration-200 hover:-translate-y-0.5"
+              >
+                <div className="flex items-center justify-between text-text-muted mb-2">
+                  <Icon className="size-3.5 text-blue-400" />
+                </div>
+                <dt className="num text-xl font-bold text-text tracking-tight">{val}</dt>
+                <dd className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mt-1">{label}</dd>
               </div>
             ))}
           </dl>
         </div>
-        <p className="relative text-xs text-text-muted">B2B Customer Health Scoring Dashboard · Enterprise Edition</p>
+
+        <div className="relative z-10 flex items-center justify-between text-xs text-text-muted border-t border-white/[0.06] pt-6">
+          <span>PulseScore B2B Console</span>
+          <span className="font-mono text-[11px] text-text-subtle">v1.0 Production Architecture</span>
+        </div>
       </aside>
 
-      {/* Form */}
+      {/* Form authentication panel */}
       <section className="flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
         <div className="w-full max-w-sm">
           <div className="mb-8 lg:hidden">
             <Logo />
           </div>
-          <h1 className="text-2xl font-semibold text-text">Sign in</h1>
-          <p className="mt-1 text-sm text-text-muted">Use your Customer Success workspace credentials.</p>
-          <div className="mt-8">
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold tracking-tight text-text">Access Console</h1>
+            <p className="mt-1 text-xs text-text-muted">Enter authorized Customer Success credentials to sign in.</p>
+          </div>
+          <div>
             <Suspense fallback={null}>
               <LoginRedirect />
               <LoginForm />

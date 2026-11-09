@@ -18,16 +18,16 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Health Dashboard",
-    template: "%s · Health Dashboard",
+    default: "PulseScore · B2B Customer Health OS",
+    template: "%s · PulseScore",
   },
-  description: "B2B Customer Health Scoring Dashboard — Customer Success operational console.",
+  description: "Awwwards-grade Customer Health Scoring Console with real-time multi-signal telemetry.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} h-full`}>
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col selection:bg-blue-500/25">
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

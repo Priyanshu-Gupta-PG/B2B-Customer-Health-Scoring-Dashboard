@@ -1,27 +1,44 @@
 @import "tailwindcss";
 
-/* Design tokens — UX-B2B-01 §6 */
+/* 
+ * Neo-Luxury Human-Crafted Design System
+ * Inspired by Linear, Stripe Press, and Awwwards-winning SaaS consoles
+ * Non-neon, human-toned dark palette with warm undertones & physical depth
+ */
 @theme {
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-danger: #ef4444;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-subtle: rgba(59, 130, 246, 0.12);
+  --color-danger: #f43f5e;
+  --color-danger-subtle: rgba(244, 63, 94, 0.12);
   --color-warning: #f59e0b;
+  --color-warning-subtle: rgba(245, 158, 11, 0.12);
   --color-success: #10b981;
-  --color-bg: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-raised: #273449;
-  --color-border: #334155;
-  --color-text: #f8fafc;
-  --color-text-muted: #94a3b8;
+  --color-success-subtle: rgba(16, 185, 129, 0.12);
+  
+  /* Warm Obsidian & Tactile Graphite surfaces */
+  --color-bg: #090b0e;
+  --color-surface: #11141a;
+  --color-surface-raised: #181c24;
+  --color-surface-elevated: #1f242e;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-focus: rgba(255, 255, 255, 0.2);
+  
+  --color-text: #f4f5f7;
+  --color-text-muted: #949ca8;
+  --color-text-subtle: #636b77;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 
-  --radius-card: 0.75rem;
+  --radius-card: 0.875rem;
+  --radius-badge: 9999px;
 }
 
 html {
   color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -29,50 +46,159 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.04), transparent),
+    radial-gradient(ellipse 60% 30% at 80% 10%, rgba(16, 185, 129, 0.02), transparent);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-/* Numeric data uses the mono face for column alignment */
+/* Numeric data uses the mono face for precise column alignment */
 .num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
-@keyframes shimmer {
+/* Luxury card with subtle inner bevel & precision border */
+.card-premium {
+  position: relative;
+  background: linear-gradient(180deg, rgba(22, 26, 34, 0.85) 0%, rgba(15, 18, 24, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px -4px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-card);
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-premium-hover:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 12px 32px -4px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Ambient glow orb for hero & metric emphasis */
+.ambient-glow-indigo {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+}
+
+.ambient-glow-emerald {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+}
+
+.ambient-glow-amber {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+}
+
+/* Keyframe animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes softPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.75; }
+}
+
+@keyframes refreshRipple {
   0% {
-    background-position: -400px 0;
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
   }
   100% {
-    background-position: 400px 0;
+    box-shadow: 0 0 0 12px rgba(59, 130, 246, 0);
   }
 }
 
-.skeleton {
-  background: linear-gradient(90deg, #1e293b 0%, #273449 50%, #1e293b 100%);
-  background-size: 800px 100%;
-  animation: shimmer 1.4s infinite linear;
+/* Staggered entrance animation utility classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Subtle flash used by the dashboard when fresh data arrives */
-@keyframes pulse-ring {
-  0% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
-  }
-  100% {
-    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
-  }
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2.8s ease-in-out infinite;
 }
 
 .data-refreshed {
-  animation: pulse-ring 0.9s ease-out 1;
+  animation: refreshRipple 0.8s ease-out 1;
 }
 
+/* Animation stagger delays for rich dashboard cascades */
+.stagger-1 { animation-delay: 0.04s; }
+.stagger-2 { animation-delay: 0.08s; }
+.stagger-3 { animation-delay: 0.12s; }
+.stagger-4 { animation-delay: 0.16s; }
+.stagger-5 { animation-delay: 0.20s; }
+.stagger-6 { animation-delay: 0.24s; }
+
+/* Skeleton with subtle luxury metallic sweep */
+.skeleton {
+  background: linear-gradient(90deg, #11141a 0%, #1c212c 50%, #11141a 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* Tactile button pressed effect */
+button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* Refined custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-track {
   background: transparent;

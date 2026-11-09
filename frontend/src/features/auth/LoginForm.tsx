@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AlertBanner } from "@/components/ui/ErrorState";
@@ -55,81 +55,96 @@ export function LoginForm() {
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-      {expired && !serverError && <AlertBanner tone="warning">Your session expired. Please sign in again.</AlertBanner>}
+    <div className="card-premium relative rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl border border-white/10 animate-fade-in-up">
+      {/* Subtle ambient orb */}
+      <div className="ambient-glow-indigo pointer-events-none absolute -top-12 -right-12 size-40 rounded-full blur-3xl opacity-50" />
 
-      <Input
-        label="Email"
-        type="email"
-        autoComplete="email"
-        placeholder="you@company.com"
-        leading={<Mail className="size-4" />}
-        error={errors.email?.message}
-        {...register("email")}
-      />
-      <Input
-        label="Password"
-        type={showPassword ? "text" : "password"}
-        autoComplete="current-password"
-        placeholder="••••••••"
-        leading={<Lock className="size-4" />}
-        trailing={
-          <button
-            type="button"
-            onClick={() => setShowPassword((s) => !s)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-            className="pointer-events-auto text-text-muted hover:text-text"
-          >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-          </button>
-        }
-        error={errors.password?.message}
-        {...register("password")}
-      />
+      <form onSubmit={onSubmit} noValidate className="relative z-10 flex flex-col gap-4">
+        {expired && !serverError && (
+          <AlertBanner tone="warning">Your session expired. Please sign in again.</AlertBanner>
+        )}
 
-      {serverError && (
-        <p className="text-sm text-danger" role="alert">
-          {serverError}
-        </p>
-      )}
+        <Input
+          label="Corporate Email"
+          type="email"
+          autoComplete="email"
+          placeholder="user@company.com"
+          leading={<Mail className="size-4" />}
+          error={errors.email?.message}
+          {...register("email")}
+        />
 
-      <Button type="submit" size="lg" loading={isSubmitting} className="mt-2 w-full">
-        {isSubmitting ? "Signing in…" : "Sign in"}
-      </Button>
-
-      {env.useMocks && (
-        <div className="mt-2 rounded-lg border border-dashed border-border bg-bg/60 p-3 text-xs text-text-muted">
-          <p className="mb-2 font-medium text-text">Mock API is enabled — demo accounts</p>
-          <div className="flex flex-col gap-1.5">
+        <Input
+          label="Security Key / Password"
+          type={showPassword ? "text" : "password"}
+          autoComplete="current-password"
+          placeholder="••••••••••••"
+          leading={<Lock className="size-4" />}
+          trailing={
             <button
               type="button"
-              className="flex items-center justify-between rounded-md px-2 py-1.5 text-left hover:bg-surface-raised"
-              onClick={() => {
-                setValue("email", "admin@company.com", { shouldValidate: true });
-                setValue("password", "Admin123!", { shouldValidate: true });
-              }}
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="pointer-events-auto text-text-muted hover:text-text cursor-pointer transition-colors"
             >
-              <span>
-                <span className="font-mono text-text">admin@company.com</span> · Administrator
-              </span>
-              <span className="text-blue-300">Use</span>
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
-            <button
-              type="button"
-              className="flex items-center justify-between rounded-md px-2 py-1.5 text-left hover:bg-surface-raised"
-              onClick={() => {
-                setValue("email", "csm@company.com", { shouldValidate: true });
-                setValue("password", "Csm12345!", { shouldValidate: true });
-              }}
-            >
-              <span>
-                <span className="font-mono text-text">csm@company.com</span> · CSM (read-only)
-              </span>
-              <span className="text-blue-300">Use</span>
-            </button>
+          }
+          error={errors.password?.message}
+          {...register("password")}
+        />
+
+        {serverError && (
+          <p className="text-xs font-medium text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5" role="alert">
+            {serverError}
+          </p>
+        )}
+
+        <Button type="submit" size="lg" loading={isSubmitting} className="mt-2 w-full gap-2">
+          <span>{isSubmitting ? "Authenticating session..." : "Access Console"}</span>
+          <ArrowRight className="size-4" />
+        </Button>
+
+        {env.useMocks && (
+          <div className="mt-4 rounded-xl border border-white/[0.08] bg-surface-raised/40 p-3.5 text-xs text-text-muted space-y-2">
+            <div className="flex items-center gap-1.5 text-text font-medium text-[11px] uppercase tracking-wider">
+              <Sparkles className="size-3.5 text-blue-400" />
+              <span>One-Click Demo Credentials</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                className="flex flex-col text-left rounded-lg border border-white/[0.06] bg-white/[0.02] p-2 hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer"
+                onClick={() => {
+                  setValue("email", "admin@company.com", { shouldValidate: true });
+                  setValue("password", "Admin123!", { shouldValidate: true });
+                }}
+              >
+                <span className="flex items-center gap-1.5 font-semibold text-text text-xs">
+                  <ShieldCheck className="size-3.5 text-emerald-400" />
+                  Admin
+                </span>
+                <span className="text-[10px] text-text-muted font-mono mt-0.5">admin@company.com</span>
+              </button>
+
+              <button
+                type="button"
+                className="flex flex-col text-left rounded-lg border border-white/[0.06] bg-white/[0.02] p-2 hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer"
+                onClick={() => {
+                  setValue("email", "csm@company.com", { shouldValidate: true });
+                  setValue("password", "Csm12345!", { shouldValidate: true });
+                }}
+              >
+                <span className="flex items-center gap-1.5 font-semibold text-text text-xs">
+                  <User className="size-3.5 text-blue-400" />
+                  CSM (Read-only)
+                </span>
+                <span className="text-[10px] text-text-muted font-mono mt-0.5">csm@company.com</span>
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </form>
+        )}
+      </form>
+    </div>
   );
 }
