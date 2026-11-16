@@ -9,14 +9,28 @@ import { useEffect } from "react";
 export default function MockBoot({ onReady }: { onReady: () => void }) {
   useEffect(() => {
     let cancelled = false;
+    let settled = false;
+
+    const finish = () => {
+      if (cancelled || settled) return;
+      settled = true;
+      onReady();
+    };
+
+    // Absolute fallback if dynamic import or SW start never settles.
+    const hardTimeout = window.setTimeout(finish, 4000);
+
     import("./browser")
       .then(({ startMocks }) => startMocks())
       .catch((err) => console.error("[mocks] failed to start service worker", err))
       .finally(() => {
-        if (!cancelled) onReady();
+        window.clearTimeout(hardTimeout);
+        finish();
       });
+
     return () => {
       cancelled = true;
+      window.clearTimeout(hardTimeout);
     };
   }, [onReady]);
 
