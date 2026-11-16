@@ -4,8 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
-  useSyncExternalStore,
+  useState,
   type ReactNode,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,52 +32,33 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function subscribeAuth(onChange: () => void) {
-  const onStorage = (e: StorageEvent) => {
-    if (e.key === null || e.key.startsWith("hd.")) onChange();
-  };
-  window.addEventListener("storage", onStorage);
-  window.addEventListener(AUTH_CHANGE_EVENT, onChange);
-  return () => {
-    window.removeEventListener("storage", onStorage);
-    window.removeEventListener(AUTH_CHANGE_EVENT, onChange);
-  };
-}
-
-let cachedRaw: string | null | undefined;
-let cachedUser: AuthUser | null = null;
-
-function getAuthUser() {
-  const store = typeof window === "undefined" ? null : window.localStorage;
-  const raw = store
-    ? `${store.getItem("hd.token")}|${store.getItem("hd.user")}|${store.getItem("hd.expires_at")}`
-    : null;
-  if (raw === cachedRaw) return cachedUser;
-  cachedRaw = raw;
-  cachedUser = readSession()?.user ?? null;
-  return cachedUser;
-}
-
-/** Flip from SSR snapshot → client snapshot after hydration (empty subscribe never re-renders). */
-function subscribeIsClient(onStoreChange: () => void) {
-  const id = window.setTimeout(onStoreChange, 0);
-  return () => window.clearTimeout(id);
-}
-
-function useClientReady() {
-  return useSyncExternalStore(subscribeIsClient, () => true, () => false);
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const user = useSyncExternalStore(subscribeAuth, getAuthUser, () => null);
-  const isLoading = !useClientReady();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const sync = () => setUser(readSession()?.user ?? null);
+    sync();
+    setIsLoading(false);
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null || e.key.startsWith("hd.")) sync();
+    };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener(AUTH_CHANGE_EVENT, sync);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(AUTH_CHANGE_EVENT, sync);
+    };
+  }, []);
 
   const login = useCallback(
     async (body: LoginRequest) => {
       const res = await loginRequest(body);
       writeSession({ token: res.token, user: res.user, expiresAt: res.expires_at });
       notifyAuthChange();
+      setUser(res.user);
       queryClient.clear();
       return res.user;
     },
@@ -86,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     clearSession();
     notifyAuthChange();
+    setUser(null);
     queryClient.clear();
   }, [queryClient]);
 
