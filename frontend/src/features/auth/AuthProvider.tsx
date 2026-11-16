@@ -57,12 +57,14 @@ function getAuthUser() {
   return cachedUser;
 }
 
+/** Flip from SSR snapshot → client snapshot after hydration (empty subscribe never re-renders). */
+function subscribeIsClient(onStoreChange: () => void) {
+  const id = window.setTimeout(onStoreChange, 0);
+  return () => window.clearTimeout(id);
+}
+
 function useClientReady() {
-  return useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
+  return useSyncExternalStore(subscribeIsClient, () => true, () => false);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

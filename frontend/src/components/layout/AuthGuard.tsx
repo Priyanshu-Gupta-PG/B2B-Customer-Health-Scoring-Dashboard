@@ -15,12 +15,22 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
-    }
+    if (isLoading || isAuthenticated) return;
+
+    const next = `/login?next=${encodeURIComponent(pathname)}`;
+    router.replace(next);
+
+    // Hard fallback if the App Router navigation stalls.
+    const fallback = window.setTimeout(() => {
+      if (window.location.pathname !== "/login") {
+        window.location.assign(next);
+      }
+    }, 1500);
+
+    return () => window.clearTimeout(fallback);
   }, [isAuthenticated, isLoading, pathname, router]);
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <Logo />
@@ -28,5 +38,15 @@ export function AuthGuard({ children }: { children: ReactNode }) {
       </div>
     );
   }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <Logo />
+        <p className="text-text-muted text-xs">Redirecting to sign in…</p>
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
