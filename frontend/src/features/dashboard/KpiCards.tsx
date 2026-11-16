@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Activity, AlertTriangle, Building2, RefreshCw } from "lucide-react";
 import { CronStatusIndicator } from "@/components/system/CronStatusIndicator";
 import { Card } from "@/components/ui/Card";
@@ -34,9 +35,9 @@ export function KpiCards({
       className={cn("grid gap-4 sm:grid-cols-2 xl:grid-cols-4", highlight && "data-refreshed")}
       aria-label="Portfolio KPIs"
     >
-      {/* 1. Total Accounts */}
       <KpiCard
-        label="Total Active Accounts"
+        href="/accounts"
+        label="Total accounts"
         value={formatNumber(summary.total_accounts)}
         hint="Under active CS telemetry"
         icon={<Building2 className="text-blue-400 size-4" aria-hidden />}
@@ -45,22 +46,21 @@ export function KpiCards({
         <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-white/[0.06] pt-3 text-xs text-text-muted">
           <span className="flex items-center gap-1.5">
             <span className="size-1.5 rounded-full bg-blue-400" />
-            100% telemetry synced
+            Portfolio synced
           </span>
-          <span className="font-mono text-[11px] text-text-subtle">Real-time</span>
+          <span className="font-mono text-[11px] text-text-subtle">Live</span>
         </div>
       </KpiCard>
 
-      {/* 2. Accounts at Risk */}
       <KpiCard
-        label="Accounts at Risk"
+        href="/accounts?status=Critical"
+        label="Accounts at risk"
         value={formatNumber(summary.at_risk_accounts)}
         valueClassName={atRiskClass}
         hint={`${formatNumber(critical)} critical · ${formatNumber(atRiskOnly)} at-risk`}
         icon={<AlertTriangle className={cn("size-4", atRiskClass)} aria-hidden />}
         glowClass="ambient-glow-amber"
       >
-        {/* Risk proportion progress bar */}
         <div className="mt-3.5 space-y-1.5 border-t border-white/[0.06] pt-3">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-raised flex">
             <div
@@ -85,26 +85,29 @@ export function KpiCards({
         </div>
       </KpiCard>
 
-      {/* 3. Average Score */}
       <KpiCard
-        label="Average Portfolio Health"
+        label="Avg portfolio health"
         value={summary.average_score.toFixed(1)}
         valueClassName={scoreTextClass(summary.average_score)}
-        hint="Deterministic composite 0–100"
+        hint="Composite score 0–100"
         icon={<Activity className="text-emerald-400 size-4" aria-hidden />}
         glowClass="ambient-glow-emerald"
       >
         <div className="mt-3.5 flex items-center justify-between border-t border-white/[0.06] pt-3">
           <StatusBadge score={summary.average_score} size="sm" />
           <span className="text-[11px] text-text-muted font-mono">
-            {summary.average_score >= 71 ? "Optimal" : summary.average_score >= 31 ? "Attention Required" : "Action Needed"}
+            {summary.average_score >= 71
+              ? "On track"
+              : summary.average_score >= 31
+                ? "Needs attention"
+                : "Action needed"}
           </span>
         </div>
       </KpiCard>
 
-      {/* 4. Last Data Sync */}
       <KpiCard
-        label="Last Data Ingestion"
+        href="/settings"
+        label="Last data sync"
         value={formatRelative(summary.last_sync_at)}
         hint={
           summary.last_sync_at
@@ -130,6 +133,7 @@ function KpiCard({
   valueClassName,
   glowClass,
   children,
+  href,
 }: {
   label: string;
   value: string;
@@ -138,10 +142,13 @@ function KpiCard({
   valueClassName?: string;
   glowClass?: string;
   children?: ReactNode;
+  href?: string;
 }) {
-  return (
-    <Card hoverable className="group relative p-5 transition-all duration-300">
-      {/* Ambient background glow orb */}
+  const body = (
+    <Card
+      hoverable={Boolean(href)}
+      className={cn("group relative p-5 transition-all duration-300 h-full", href && "cursor-pointer")}
+    >
       {glowClass && (
         <div
           className={cn(
@@ -171,5 +178,12 @@ function KpiCard({
         {children}
       </div>
     </Card>
+  );
+
+  if (!href) return body;
+  return (
+    <Link href={href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-card">
+      {body}
+    </Link>
   );
 }

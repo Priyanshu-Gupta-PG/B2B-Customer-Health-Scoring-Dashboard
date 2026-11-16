@@ -28,16 +28,16 @@ export default function LoginPage() {
 
         <div className="relative z-10 max-w-lg space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-xs text-text-muted backdrop-blur-md">
-            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Autonomous Risk Intelligence Engine</span>
+            <span className="size-1.5 rounded-full bg-emerald-400 animate-soft-pulse" />
+            <span>Customer Success console</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-[1.15] text-text">
-            Know exactly which accounts require intervention <span className="text-blue-400">before</span> churn occurs.
+            Spot at-risk accounts <span className="text-blue-400">before</span> churn hits ARR.
           </h2>
 
           <p className="text-sm leading-relaxed text-text-muted">
-            Continuous ingestion from Stripe, Zendesk, and product telemetry delivers a deterministic 0–100 health composite every 15 minutes, empowering Customer Success teams to protect enterprise ARR.
+            Stripe, Zendesk, and product usage roll into a deterministic 0–100 health score every 15 minutes — so CSMs know who to call first.
           </p>
 
           <dl className="grid grid-cols-3 gap-3.5 pt-2">
@@ -73,8 +73,8 @@ export default function LoginPage() {
             <Logo />
           </div>
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold tracking-tight text-text">Access Console</h1>
-            <p className="mt-1 text-xs text-text-muted">Enter authorized Customer Success credentials to sign in.</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-text">Sign in</h1>
+            <p className="mt-1 text-sm text-text-muted">Use your Customer Success credentials.</p>
           </div>
           <div>
             <Suspense fallback={null}>

@@ -22,19 +22,18 @@ export function DashboardScreen() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner / Hero Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/[0.06] pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-300">
-              <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Live Telemetry Engine
+              <span className="size-1.5 rounded-full bg-emerald-400 animate-soft-pulse" />
+              Live scores
             </span>
-            <span className="text-xs text-text-muted hidden sm:inline">· 15-minute sync interval</span>
+            <span className="text-xs text-text-muted hidden sm:inline">· Sync every 15 minutes</span>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-text">Customer Health Console</h1>
-          <p className="text-text-muted text-xs mt-1">
-            Real-time multi-signal scoring derived from product usage, support tickets, and invoicing.
+          <h1 className="text-2xl font-semibold tracking-tight text-text">Health overview</h1>
+          <p className="text-text-muted text-sm mt-1 max-w-xl">
+            Portfolio pulse from product usage, support load, and billing signals.
           </p>
         </div>
 

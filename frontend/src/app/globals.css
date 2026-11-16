@@ -29,7 +29,7 @@
   --color-text-muted: #949ca8;
   --color-text-subtle: #636b77;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 
   --radius-card: 0.875rem;
@@ -86,7 +86,16 @@ body {
 
 /* Ambient glow orb for hero & metric emphasis */
 .ambient-glow-indigo {
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+}
+
+/* Sticky table chrome for long account lists */
+.table-sticky-head th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(17, 20, 26, 0.96);
+  backdrop-filter: blur(8px);
 }
 
 .ambient-glow-emerald {

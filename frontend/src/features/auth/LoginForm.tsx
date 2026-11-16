@@ -65,7 +65,7 @@ export function LoginForm() {
         )}
 
         <Input
-          label="Corporate Email"
+          label="Work email"
           type="email"
           autoComplete="email"
           placeholder="user@company.com"
@@ -75,7 +75,7 @@ export function LoginForm() {
         />
 
         <Input
-          label="Security Key / Password"
+          label="Password"
           type={showPassword ? "text" : "password"}
           autoComplete="current-password"
           placeholder="••••••••••••"
@@ -101,7 +101,7 @@ export function LoginForm() {
         )}
 
         <Button type="submit" size="lg" loading={isSubmitting} className="mt-2 w-full gap-2">
-          <span>{isSubmitting ? "Authenticating session..." : "Access Console"}</span>
+          <span>{isSubmitting ? "Signing in…" : "Sign in"}</span>
           <ArrowRight className="size-4" />
         </Button>
 
@@ -109,7 +109,7 @@ export function LoginForm() {
           <div className="mt-4 rounded-xl border border-white/[0.08] bg-surface-raised/40 p-3.5 text-xs text-text-muted space-y-2">
             <div className="flex items-center gap-1.5 text-text font-medium text-[11px] uppercase tracking-wider">
               <Sparkles className="size-3.5 text-blue-400" />
-              <span>One-Click Demo Credentials</span>
+              <span>Demo accounts</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               <button

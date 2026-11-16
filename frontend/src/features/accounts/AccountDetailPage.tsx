@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { ApiError } from "@/lib/errors";
+import { cn } from "@/lib/cn";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardBody } from "@/components/ui/Card";
 import { NotFoundExperience } from "@/components/ui/NotFoundExperience";
@@ -11,6 +12,7 @@ import { SectionErrorBoundary } from "@/components/ui/SectionErrorBoundary";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { HealthTrendChart, type HistoryRange } from "@/components/charts/HealthTrendChart";
+import { useRules } from "@/features/rules/hooks";
 import { AccountInfoCard } from "./AccountInfoCard";
 import { AccountMetricsList } from "./AccountMetricsList";
 import { useAccount, useAccountHistory } from "./hooks";
@@ -19,6 +21,7 @@ export function AccountDetailPage({ accountId }: { accountId: string }) {
   const [days, setDays] = useState<HistoryRange>(30);
   const accountQuery = useAccount(accountId);
   const historyQuery = useAccountHistory(accountId, days);
+  const rulesQuery = useRules();
 
   const accountError = accountQuery.error;
   const notFound = accountError instanceof ApiError && accountError.status === 404;
@@ -88,23 +91,52 @@ export function AccountDetailPage({ accountId }: { accountId: string }) {
         }
       />
 
-      {/* At-Risk Callout banner if critical or at-risk */}
       {isAtRisk && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fade-in-up">
+        <div
+          className={cn(
+            "rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fade-in-up",
+            account.current_score <= 30
+              ? "border-rose-500/30 bg-rose-500/10"
+              : "border-amber-500/30 bg-amber-500/10",
+          )}
+        >
           <div className="flex items-center gap-3">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-300">
+            <div
+              className={cn(
+                "flex size-8 shrink-0 items-center justify-center rounded-lg",
+                account.current_score <= 30
+                  ? "bg-rose-500/20 text-rose-300"
+                  : "bg-amber-500/20 text-amber-300",
+              )}
+            >
               <ShieldAlert className="size-4" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-amber-300">
-                {account.current_score <= 30 ? "Critical Churn Hazard" : "Elevated Risk Detected"}
+              <p
+                className={cn(
+                  "text-xs font-semibold",
+                  account.current_score <= 30 ? "text-rose-300" : "text-amber-300",
+                )}
+              >
+                {account.current_score <= 30 ? "Critical — prioritize outreach" : "Elevated risk"}
               </p>
-              <p className="text-[11px] text-amber-200/80 mt-0.5">
-                Current score ({account.current_score}/100) indicates deteriorating engagement across support tickets or invoice latency.
+              <p
+                className={cn(
+                  "text-[11px] mt-0.5",
+                  account.current_score <= 30 ? "text-rose-200/80" : "text-amber-200/80",
+                )}
+              >
+                Score {account.current_score}/100. Check support load, usage drop-off, or overdue invoices below.
               </p>
             </div>
           </div>
-          <Link href="/rules" className="shrink-0 text-xs font-medium text-amber-300 hover:text-white underline">
+          <Link
+            href="/rules"
+            className={cn(
+              "shrink-0 text-xs font-medium hover:text-white underline",
+              account.current_score <= 30 ? "text-rose-300" : "text-amber-300",
+            )}
+          >
             Review scoring formula
           </Link>
         </div>
@@ -129,9 +161,8 @@ export function AccountDetailPage({ accountId }: { accountId: string }) {
         </div>
       </div>
 
-      {/* Raw Metrics List */}
       <div>
-        <AccountMetricsList metrics={account.metrics} />
+        <AccountMetricsList metrics={account.metrics} rules={rulesQuery.data ?? []} />
       </div>
     </div>
   );

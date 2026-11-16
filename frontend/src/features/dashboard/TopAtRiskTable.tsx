@@ -22,13 +22,13 @@ export function TopAtRiskTable({ accounts }: { accounts: AccountSummary[] }) {
             Top At-Risk Accounts
           </span>
         }
-        description="Priority outreach · Critical (0–30) and At-Risk (31–70)"
+        description="Prioritize outreach · Critical (0–30) and At-Risk (31–70)"
         action={
           <Link
             href="/accounts?status=Critical"
             className="group inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
           >
-            <span>View all in directory</span>
+            <span>View critical accounts</span>
             <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         }

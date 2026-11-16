@@ -19,7 +19,7 @@ export function PageHeader({
       <div className="min-w-0">
         {breadcrumb && <div className="mb-2 text-xs text-text-muted">{breadcrumb}</div>}
         <h1 className="truncate text-xl font-semibold tracking-tight text-text sm:text-2xl">{title}</h1>
-        {description && <p className="mt-1 text-sm text-text-muted">{description}</p>}
+        {description && <div className="mt-1 text-sm text-text-muted">{description}</div>}
       </div>
       {actions && (
         <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto">{actions}</div>

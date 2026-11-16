@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronRight, Search } from "lucide-react";
 import {
   columnFilteringFeature,
   createColumnHelper,
+  createCoreRowModel,
   createFilteredRowModel,
   createPaginatedRowModel,
   createSortedRowModel,
@@ -19,7 +21,7 @@ import {
 } from "@tanstack/react-table";
 import type { AccountSummary, HealthStatus } from "@/types/api";
 import { ALL_STATUSES, STATUS_ORDER, scoreTextClass } from "@/lib/status";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDate, formatNumber } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -36,6 +38,7 @@ const features = tableFeatures({
   globalFilteringFeature,
   rowSortingFeature,
   rowPaginationFeature,
+  coreRowModel: createCoreRowModel(),
   filteredRowModel: createFilteredRowModel(),
   sortedRowModel: createSortedRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
@@ -117,13 +120,18 @@ const columns = helper.columns([
           onClick={(event) => event.stopPropagation()}
           className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
         >
-          <span>Dossier</span>
+          <span>Open</span>
           <ChevronRight className="size-3.5" />
         </Link>
       </div>
     ),
   }),
 ]);
+
+function parseStatusParam(value: string | null): HealthStatus | "" {
+  if (value === "Critical" || value === "At-Risk" || value === "Healthy") return value;
+  return "";
+}
 
 export function AccountDataGrid({
   data,
@@ -137,6 +145,9 @@ export function AccountDataGrid({
   onRetry?: () => void;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const statusFromUrl = parseStatusParam(searchParams.get("status"));
+
   const table = useTable({
     features,
     columns,
@@ -147,29 +158,53 @@ export function AccountDataGrid({
     initialState: {
       pagination: { pageIndex: 0, pageSize: 25 },
       sorting: [{ id: "current_score", desc: false }],
+      columnFilters: statusFromUrl ? [{ id: "health_status", value: statusFromUrl }] : [],
     },
   });
+
+  // Keep table filter in sync with ?status= deep links (dashboard → accounts).
+  useEffect(() => {
+    const column = table.getColumn("health_status");
+    const current = (column?.getFilterValue() as HealthStatus | undefined) ?? "";
+    if (current !== statusFromUrl) {
+      column?.setFilterValue(statusFromUrl || undefined);
+      table.setPageIndex(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from URL only
+  }, [statusFromUrl]);
 
   const search = typeof table.state.globalFilter === "string" ? table.state.globalFilter : "";
   const statusFilter = (table.getColumn("health_status")?.getFilterValue() as HealthStatus | undefined) ?? "";
   const pageIndex = table.state.pagination.pageIndex;
   const pageSize = table.state.pagination.pageSize;
-  const filteredCount = table.getRowCount();
+  const filteredCount = table.getPrePaginatedRowModel().rows.length;
   const pageCount = table.getPageCount();
   const rows = table.getRowModel().rows;
 
+  const setStatusFilter = (value: string) => {
+    table.getColumn("health_status")?.setFilterValue(value ? (value as HealthStatus) : undefined);
+    table.setPageIndex(0);
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set("status", value);
+    else params.delete("status");
+    const query = params.toString();
+    router.replace(query ? `/accounts?${query}` : "/accounts", { scroll: false });
+  };
+
   return (
     <Card className="animate-fade-in-up">
-      {/* Search and Filters toolbar */}
       <div className="flex flex-col gap-3 border-b border-white/[0.06] bg-white/[0.01] px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-end">
           <div className="min-w-0 flex-1 sm:max-w-sm">
             <Input
               id="account-search"
-              label="Search Portfolio"
+              label="Search portfolio"
               placeholder="Search by company name..."
               value={search}
-              onChange={(event) => table.setGlobalFilter(event.target.value)}
+              onChange={(event) => {
+                table.setGlobalFilter(event.target.value);
+                table.setPageIndex(0);
+              }}
               leading={<Search className="size-4" />}
               disabled={isLoading || isError}
             />
@@ -177,15 +212,12 @@ export function AccountDataGrid({
           <div className="w-full sm:w-44">
             <Select
               id="account-status"
-              label="Health Band"
+              label="Health band"
               value={statusFilter}
               disabled={isLoading || isError}
-              onChange={(event) => {
-                const value = event.target.value;
-                table.getColumn("health_status")?.setFilterValue(value ? (value as HealthStatus) : undefined);
-              }}
+              onChange={(event) => setStatusFilter(event.target.value)}
             >
-              <option value="">All Tiers</option>
+              <option value="">All tiers</option>
               {ALL_STATUSES.map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -195,9 +227,20 @@ export function AccountDataGrid({
           </div>
         </div>
 
-        {/* Counter pill */}
-        <div className="text-xs text-text-muted font-mono self-start sm:self-end pb-1.5">
-          Showing <span className="text-text font-semibold">{filteredCount}</span> of {data.length} accounts
+        <div className="text-xs text-text-muted self-start sm:self-end pb-1.5">
+          <span className="num text-text font-semibold">{formatNumber(filteredCount)}</span>
+          <span> of </span>
+          <span className="num">{formatNumber(data.length)}</span>
+          <span> accounts</span>
+          {statusFilter ? (
+            <button
+              type="button"
+              onClick={() => setStatusFilter("")}
+              className="ml-2 text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+            >
+              Clear filter
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -206,11 +249,27 @@ export function AccountDataGrid({
       ) : isLoading ? (
         <TableSkeleton rows={8} cols={6} />
       ) : rows.length === 0 ? (
-        <EmptyState title="No accounts match your filter criteria." />
+        <EmptyState
+          title="No accounts match your filter criteria."
+          action={
+            statusFilter || search ? (
+              <button
+                type="button"
+                className="text-xs font-medium text-blue-400 hover:text-blue-300 cursor-pointer"
+                onClick={() => {
+                  table.setGlobalFilter("");
+                  setStatusFilter("");
+                }}
+              >
+                Reset search and filters
+              </button>
+            ) : undefined
+          }
+        />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-            <thead className="border-b border-white/[0.06] bg-white/[0.02] text-[11px] font-medium uppercase tracking-wider text-text-muted">
+        <div className="overflow-x-auto max-h-[min(70vh,44rem)]">
+          <table className="table-sticky-head w-full min-w-[720px] border-collapse text-left text-sm">
+            <thead className="border-b border-white/[0.06] text-[11px] font-medium uppercase tracking-wider text-text-muted">
               {table.getHeaderGroups().map((group) => (
                 <tr key={group.id}>
                   {group.headers.map((header) => {
@@ -241,7 +300,7 @@ export function AccountDataGrid({
                 <tr
                   key={row.id}
                   tabIndex={0}
-                  className="group cursor-pointer transition-colors duration-150 hover:bg-white/[0.04] focus-visible:bg-white/[0.04] focus-visible:outline-none"
+                  className="group cursor-pointer transition-colors duration-150 hover:bg-white/[0.04] focus-visible:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500/30"
                   onClick={() => router.push(`/accounts/${row.original.id}`)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
