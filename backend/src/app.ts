@@ -29,6 +29,8 @@ export function createApp() {
       }),
     );
   }
+
+  const normalizedFrontend = (config.frontendOrigin ?? "").replace(/\/$/, "");
   app.use(
     cors({
       origin(origin, callback) {
@@ -37,15 +39,18 @@ export function createApp() {
           return;
         }
         const allowed = new Set([
-          config.frontendOrigin,
+          normalizedFrontend,
           "http://localhost:3000",
           "http://localhost:3001",
           "http://127.0.0.1:3000",
           "http://127.0.0.1:3001",
         ]);
-        const localDev =
+        const isRenderApp = /\.onrender\.com$/.test(new URL(origin).hostname);
+        const isLocalDev =
           config.nodeEnv !== "production" && /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
-        callback(null, allowed.has(origin) || localDev);
+        const allowAny = config.frontendOrigin === "*";
+
+        callback(null, allowed.has(origin) || isRenderApp || isLocalDev || allowAny);
       },
       credentials: true,
     }),

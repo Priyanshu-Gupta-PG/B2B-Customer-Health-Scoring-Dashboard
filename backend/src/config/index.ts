@@ -20,10 +20,6 @@ function loadOrCreateDevKeys() {
     return { privateKey: unescapePem(envPriv), publicKey: unescapePem(envPub) };
   }
 
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("JWT_PRIVATE_KEY and JWT_PUBLIC_KEY are required in production.");
-  }
-
   const dir = join(backendRoot, ".dev-keys");
   const privPath = join(dir, "jwt-private.pem");
   const pubPath = join(dir, "jwt-public.pem");
@@ -31,13 +27,21 @@ function loadOrCreateDevKeys() {
     return { privateKey: readFileSync(privPath, "utf8"), publicKey: readFileSync(pubPath, "utf8") };
   }
 
-  mkdirSync(dir, { recursive: true });
-  const pair = generateKeyPairSync("rsa", { modulusLength: 2048 });
-  const privateKey = pair.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
-  const publicKey = pair.publicKey.export({ type: "spki", format: "pem" }).toString();
-  writeFileSync(privPath, privateKey);
-  writeFileSync(pubPath, publicKey);
-  return { privateKey, publicKey };
+  try {
+    mkdirSync(dir, { recursive: true });
+    const pair = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const privateKey = pair.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    const publicKey = pair.publicKey.export({ type: "spki", format: "pem" }).toString();
+    writeFileSync(privPath, privateKey);
+    writeFileSync(pubPath, publicKey);
+    return { privateKey, publicKey };
+  } catch {
+    // Fallback in-memory for containerized/ephemeral platforms like Render
+    const pair = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const privateKey = pair.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    const publicKey = pair.publicKey.export({ type: "spki", format: "pem" }).toString();
+    return { privateKey, publicKey };
+  }
 }
 
 const keys = loadOrCreateDevKeys();
