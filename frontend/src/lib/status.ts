@@ -14,9 +14,9 @@ export const STATUS_ORDER: Record<HealthStatus, number> = {
 };
 
 export const STATUS_COLOR: Record<HealthStatus, string> = {
-  Critical: "#ef4444",
-  "At-Risk": "#f59e0b",
-  Healthy: "#10b981",
+  Critical: "#b42318",
+  "At-Risk": "#b54708",
+  Healthy: "#067647",
 };
 
 export const STATUS_LABEL: Record<HealthStatus, string> = {

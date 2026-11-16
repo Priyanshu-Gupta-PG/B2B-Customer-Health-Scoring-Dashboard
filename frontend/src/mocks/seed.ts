@@ -25,17 +25,75 @@ export function makeUuid(rand: () => number) {
 }
 
 const PREFIXES = [
-  "Acme", "Northwind", "Globex", "Initech", "Umbrella", "Vandelay", "Stark", "Wayne", "Hooli",
-  "Pied Piper", "Aperture", "Cyberdyne", "Soylent", "Tyrell", "Wonka", "Massive", "Dunder",
-  "Bluth", "Sterling", "Prestige", "Oceanic", "Virtucon", "Gringotts", "Monarch", "Lumon",
-  "Vehement", "Arasaka", "Weyland", "Rekall", "Nakatomi", "Zorg", "Oscorp", "Ollivander",
-  "Kaiba", "Shinra", "Abstergo", "Blackwood", "Helix", "Nimbus", "Quantum", "Vertex", "Zenith",
-  "Harbor", "Beacon", "Summit", "Cobalt", "Granite", "Ember", "Juniper", "Meridian",
+  "Acme",
+  "Northwind",
+  "Globex",
+  "Initech",
+  "Umbrella",
+  "Vandelay",
+  "Stark",
+  "Wayne",
+  "Hooli",
+  "Pied Piper",
+  "Aperture",
+  "Cyberdyne",
+  "Soylent",
+  "Tyrell",
+  "Wonka",
+  "Massive",
+  "Dunder",
+  "Bluth",
+  "Sterling",
+  "Prestige",
+  "Oceanic",
+  "Virtucon",
+  "Gringotts",
+  "Monarch",
+  "Lumon",
+  "Vehement",
+  "Arasaka",
+  "Weyland",
+  "Rekall",
+  "Nakatomi",
+  "Zorg",
+  "Oscorp",
+  "Ollivander",
+  "Kaiba",
+  "Shinra",
+  "Abstergo",
+  "Blackwood",
+  "Helix",
+  "Nimbus",
+  "Quantum",
+  "Vertex",
+  "Zenith",
+  "Harbor",
+  "Beacon",
+  "Summit",
+  "Cobalt",
+  "Granite",
+  "Ember",
+  "Juniper",
+  "Meridian",
 ];
 
 const SUFFIXES = [
-  "Corp", "Labs", "Systems", "Technologies", "Industries", "Dynamics", "Holdings", "Software",
-  "Networks", "Logistics", "Analytics", "Health", "Capital", "Robotics", "Cloud", "Digital",
+  "Corp",
+  "Labs",
+  "Systems",
+  "Technologies",
+  "Industries",
+  "Dynamics",
+  "Holdings",
+  "Software",
+  "Networks",
+  "Logistics",
+  "Analytics",
+  "Health",
+  "Capital",
+  "Robotics",
+  "Cloud",
+  "Digital",
 ];
 
 const PLANS = ["Starter", "Growth", "Business", "Enterprise"] as const;
@@ -60,9 +118,24 @@ export const METRIC_META: Record<
   MetricName,
   { source: SourceApi; label: string; unit: string; normaliseBy: number }
 > = {
-  product_usage: { source: "product", label: "Active logins (30d)", unit: "logins", normaliseBy: 60 },
-  support_tickets: { source: "zendesk", label: "Open support tickets", unit: "tickets", normaliseBy: 10 },
-  overdue_invoice: { source: "stripe", label: "Overdue invoices", unit: "invoices", normaliseBy: 5 },
+  product_usage: {
+    source: "product",
+    label: "Active logins (30d)",
+    unit: "logins",
+    normaliseBy: 60,
+  },
+  support_tickets: {
+    source: "zendesk",
+    label: "Open support tickets",
+    unit: "tickets",
+    normaliseBy: 10,
+  },
+  overdue_invoice: {
+    source: "stripe",
+    label: "Overdue invoices",
+    unit: "invoices",
+    normaliseBy: 5,
+  },
 };
 
 export function defaultRules(rand: () => number): ScoringRule[] {
@@ -121,7 +194,9 @@ export function buildSeedAccounts(count: number, rand: () => number): SeedAccoun
 
     const archetype = pickArchetype(rand());
     const plan = PLANS[Math.floor(rand() * PLANS.length)];
-    const planBase = { Starter: 6_000, Growth: 24_000, Business: 72_000, Enterprise: 180_000 }[plan];
+    const planBase = { Starter: 6_000, Growth: 24_000, Business: 72_000, Enterprise: 180_000 }[
+      plan
+    ];
     const arr = Math.round((planBase * (0.6 + rand() * 1.4)) / 100) * 100;
 
     let logins: number;

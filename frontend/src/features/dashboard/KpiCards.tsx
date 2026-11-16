@@ -24,31 +24,23 @@ export function KpiCards({
   const total = summary.total_accounts || 1;
 
   const atRiskClass =
-    critical > 0
-      ? "text-rose-400"
-      : summary.at_risk_accounts > 0
-        ? "text-amber-400"
-        : "text-emerald-400";
+    critical > 0 ? "text-danger" : summary.at_risk_accounts > 0 ? "text-warning" : "text-success";
 
   return (
     <section
-      className={cn("grid gap-4 sm:grid-cols-2 xl:grid-cols-4", highlight && "data-refreshed")}
+      className={cn("grid gap-3 sm:grid-cols-2 xl:grid-cols-4", highlight && "data-refreshed")}
       aria-label="Portfolio KPIs"
     >
       <KpiCard
         href="/accounts"
         label="Total accounts"
         value={formatNumber(summary.total_accounts)}
-        hint="Under active CS telemetry"
-        icon={<Building2 className="text-blue-400 size-4" aria-hidden />}
-        glowClass="ambient-glow-indigo"
+        hint="Active in portfolio"
+        icon={<Building2 className="text-primary size-4" aria-hidden />}
       >
-        <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-white/[0.06] pt-3 text-xs text-text-muted">
-          <span className="flex items-center gap-1.5">
-            <span className="size-1.5 rounded-full bg-blue-400" />
-            Portfolio synced
-          </span>
-          <span className="font-mono text-[11px] text-text-subtle">Live</span>
+        <div className="border-border text-text-muted mt-3 flex items-center justify-between gap-2 border-t pt-2.5 text-xs">
+          <span>Fully scored</span>
+          <span className="text-text-subtle font-mono text-[11px]">Live</span>
         </div>
       </KpiCard>
 
@@ -59,43 +51,41 @@ export function KpiCards({
         valueClassName={atRiskClass}
         hint={`${formatNumber(critical)} critical · ${formatNumber(atRiskOnly)} at-risk`}
         icon={<AlertTriangle className={cn("size-4", atRiskClass)} aria-hidden />}
-        glowClass="ambient-glow-amber"
       >
-        <div className="mt-3.5 space-y-1.5 border-t border-white/[0.06] pt-3">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-raised flex">
+        <div className="border-border mt-3 space-y-1.5 border-t pt-2.5">
+          <div className="bg-surface-elevated flex h-1.5 w-full overflow-hidden rounded-sm">
             <div
-              className="h-full bg-rose-500 transition-all duration-700 ease-out"
+              className="bg-danger h-full transition-all duration-500"
               style={{ width: `${(critical / total) * 100}%` }}
               title={`Critical: ${critical}`}
             />
             <div
-              className="h-full bg-amber-400 transition-all duration-700 ease-out"
+              className="bg-warning h-full transition-all duration-500"
               style={{ width: `${(atRiskOnly / total) * 100}%` }}
               title={`At-Risk: ${atRiskOnly}`}
             />
             <div
-              className="h-full bg-emerald-500/30 transition-all duration-700 ease-out flex-1"
+              className="bg-success/35 h-full flex-1 transition-all duration-500"
               title={`Healthy: ${healthy}`}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-text-muted font-mono">
-            <span>Critical: {Math.round((critical / total) * 100)}%</span>
-            <span>Healthy: {Math.round((healthy / total) * 100)}%</span>
+          <div className="text-text-muted flex justify-between font-mono text-[10px]">
+            <span>Critical {Math.round((critical / total) * 100)}%</span>
+            <span>Healthy {Math.round((healthy / total) * 100)}%</span>
           </div>
         </div>
       </KpiCard>
 
       <KpiCard
-        label="Avg portfolio health"
+        label="Avg health score"
         value={summary.average_score.toFixed(1)}
         valueClassName={scoreTextClass(summary.average_score)}
-        hint="Composite score 0–100"
-        icon={<Activity className="text-emerald-400 size-4" aria-hidden />}
-        glowClass="ambient-glow-emerald"
+        hint="Composite 0–100"
+        icon={<Activity className="text-success size-4" aria-hidden />}
       >
-        <div className="mt-3.5 flex items-center justify-between border-t border-white/[0.06] pt-3">
+        <div className="border-border mt-3 flex items-center justify-between border-t pt-2.5">
           <StatusBadge score={summary.average_score} size="sm" />
-          <span className="text-[11px] text-text-muted font-mono">
+          <span className="text-text-muted text-[11px]">
             {summary.average_score >= 71
               ? "On track"
               : summary.average_score >= 31
@@ -107,7 +97,7 @@ export function KpiCards({
 
       <KpiCard
         href="/settings"
-        label="Last data sync"
+        label="Last sync"
         value={formatRelative(summary.last_sync_at)}
         hint={
           summary.last_sync_at
@@ -116,9 +106,9 @@ export function KpiCards({
         }
         icon={<RefreshCw className="text-text-muted size-4" aria-hidden />}
       >
-        <div className="mt-3.5 flex items-center justify-between border-t border-white/[0.06] pt-3">
+        <div className="border-border mt-3 flex items-center justify-between border-t pt-2.5">
           <CronStatusIndicator />
-          <span className="text-[11px] text-text-subtle font-mono">Every 15m</span>
+          <span className="text-text-subtle font-mono text-[11px]">Every 15m</span>
         </div>
       </KpiCard>
     </section>
@@ -131,7 +121,6 @@ function KpiCard({
   hint,
   icon,
   valueClassName,
-  glowClass,
   children,
   href,
 }: {
@@ -140,49 +129,32 @@ function KpiCard({
   hint?: string;
   icon?: ReactNode;
   valueClassName?: string;
-  glowClass?: string;
   children?: ReactNode;
   href?: string;
 }) {
   const body = (
-    <Card
-      hoverable={Boolean(href)}
-      className={cn("group relative p-5 transition-all duration-300 h-full", href && "cursor-pointer")}
-    >
-      {glowClass && (
-        <div
-          className={cn(
-            "pointer-events-none absolute -top-10 -right-10 size-32 rounded-full opacity-60 blur-2xl transition-opacity duration-300 group-hover:opacity-100",
-            glowClass,
-          )}
-        />
-      )}
-
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-text-muted text-[11px] leading-snug font-semibold tracking-wider uppercase">
-            {label}
-          </p>
-          <div className="flex size-7 items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.06] shadow-sm">
-            {icon}
-          </div>
+    <Card hoverable={Boolean(href)} className={cn("h-full p-4", href && "cursor-pointer")}>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-text-muted text-[11px] font-semibold tracking-wide uppercase">{label}</p>
+        <div className="border-border bg-surface-raised flex size-7 items-center justify-center rounded-md border">
+          {icon}
         </div>
-
-        <div className="mt-3 flex items-baseline gap-2">
-          <p className={cn("num text-text text-3xl font-semibold tracking-tight transition-colors", valueClassName)}>
-            {value}
-          </p>
-        </div>
-
-        {hint && <p className="text-text-muted mt-1 text-xs truncate">{hint}</p>}
-        {children}
       </div>
+
+      <p className={cn("num text-text mt-2 text-2xl font-semibold tracking-tight", valueClassName)}>
+        {value}
+      </p>
+      {hint && <p className="text-text-muted mt-1 truncate text-xs">{hint}</p>}
+      {children}
     </Card>
   );
 
   if (!href) return body;
   return (
-    <Link href={href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-card">
+    <Link
+      href={href}
+      className="focus-visible:ring-primary/35 block rounded-[var(--radius-card)] focus-visible:ring-2 focus-visible:outline-none"
+    >
       {body}
     </Link>
   );

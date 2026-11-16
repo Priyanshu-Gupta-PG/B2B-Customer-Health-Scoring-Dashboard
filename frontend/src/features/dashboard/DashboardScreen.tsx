@@ -21,36 +21,23 @@ export function DashboardScreen() {
   const highlight = useDataFlash(dataUpdatedAt, Boolean(data) && !isLoading);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/[0.06] pb-5">
+    <div className="space-y-5">
+      <div className="border-border flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-300">
-              <span className="size-1.5 rounded-full bg-emerald-400 animate-soft-pulse" />
-              Live scores
-            </span>
-            <span className="text-xs text-text-muted hidden sm:inline">· Sync every 15 minutes</span>
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-text">Health overview</h1>
-          <p className="text-text-muted text-sm mt-1 max-w-xl">
-            Portfolio pulse from product usage, support load, and billing signals.
+          <h1 className="text-text text-xl font-semibold tracking-tight sm:text-2xl">Dashboard</h1>
+          <p className="text-text-muted mt-1 text-sm">
+            Portfolio health from usage, support, and billing signals.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => void refetch()}
-            loading={isFetching}
-            className="group"
-          >
-            <RefreshCw className="size-3.5 transition-transform duration-300 group-hover:rotate-180" />
+          <Button variant="secondary" size="sm" onClick={() => void refetch()} loading={isFetching}>
+            <RefreshCw className="size-3.5" />
             <span>Refresh</span>
           </Button>
           <Link href="/accounts">
             <Button size="sm" variant="primary" className="gap-1.5">
-              <span>View All Accounts</span>
+              <span>All accounts</span>
               <ArrowUpRight className="size-3.5" />
             </Button>
           </Link>
@@ -79,7 +66,7 @@ export function DashboardScreen() {
             description="Run data ingestion or wait for scheduled sync to populate portfolio accounts."
             action={
               <Link href="/settings">
-                <Button size="sm">Open Ingestion Settings</Button>
+                <Button size="sm">Open ingestion settings</Button>
               </Link>
             }
           />
@@ -87,26 +74,21 @@ export function DashboardScreen() {
       ) : null}
 
       {data && data.total_accounts > 0 ? (
-        <div className="flex flex-col gap-6 animate-fade-in-up">
+        <div className="flex flex-col gap-5">
           {isError ? (
             <AlertBanner>
               Latest refresh failed. Showing last cached snapshot — click Refresh to re-attempt.
             </AlertBanner>
           ) : null}
 
-          {/* KPI Metrics Grid */}
           <SectionErrorBoundary title="KPI cards failed to render">
-            <div className="animate-fade-in-up stagger-1">
-              <KpiCards summary={data} highlight={highlight} />
-            </div>
+            <KpiCards summary={data} highlight={highlight} />
           </SectionErrorBoundary>
 
-          {/* Secondary Analytical Grid */}
-          <div className="grid gap-6 lg:grid-cols-5 animate-fade-in-up stagger-2">
-            {/* Risk Distribution Donut */}
+          <div className="grid gap-5 lg:grid-cols-5">
             <Card className="lg:col-span-2">
               <CardHeader
-                title="Portfolio Risk Distribution"
+                title="Risk distribution"
                 description="Healthy 71–100 · At-Risk 31–70 · Critical 0–30"
               />
               <CardBody>
@@ -116,7 +98,6 @@ export function DashboardScreen() {
               </CardBody>
             </Card>
 
-            {/* Top At-Risk Table */}
             <div className="lg:col-span-3">
               <SectionErrorBoundary title="At-risk table failed to render">
                 <TopAtRiskTable accounts={data.top_at_risk} />
@@ -155,28 +136,28 @@ function useDataFlash(dataUpdatedAt: number, enabled: boolean) {
 
 function DashboardSkeleton() {
   return (
-    <div className="flex flex-col gap-6" role="status" aria-label="Loading dashboard">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="flex flex-col gap-5" role="status" aria-label="Loading dashboard">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index} className="p-5">
+          <Card key={index} className="p-4">
             <Skeleton className="h-3 w-28" />
-            <Skeleton className="mt-4 h-8 w-20" />
-            <Skeleton className="mt-2 h-3 w-36" />
+            <Skeleton className="mt-3 h-7 w-16" />
+            <Skeleton className="mt-2 h-3 w-32" />
           </Card>
         ))}
       </div>
       <div className="grid gap-4 lg:grid-cols-5">
         <Card className="lg:col-span-2">
-          <div className="border-border border-b px-5 py-4">
-            <Skeleton className="h-4 w-40" />
+          <div className="border-border border-b px-4 py-3">
+            <Skeleton className="h-4 w-36" />
           </div>
           <div className="flex items-center justify-center p-8">
-            <Skeleton className="size-44 rounded-full" />
+            <Skeleton className="size-40 rounded-full" />
           </div>
         </Card>
         <Card className="lg:col-span-3">
-          <div className="border-border border-b px-5 py-4">
-            <Skeleton className="h-4 w-48" />
+          <div className="border-border border-b px-4 py-3">
+            <Skeleton className="h-4 w-40" />
           </div>
           <TableSkeleton rows={8} cols={5} />
         </Card>

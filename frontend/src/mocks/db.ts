@@ -233,7 +233,9 @@ class MockDb {
     let rows = this.accounts.map((a) => this.toSummary(a));
     if (params.status) rows = rows.filter((r) => r.health_status === params.status);
     if (search) rows = rows.filter((r) => r.company_name.toLowerCase().includes(search));
-    rows.sort((a, b) => a.current_score - b.current_score || a.company_name.localeCompare(b.company_name));
+    rows.sort(
+      (a, b) => a.current_score - b.current_score || a.company_name.localeCompare(b.company_name),
+    );
 
     return { data: rows.slice(offset, offset + limit), total: rows.length, limit, offset };
   }
@@ -306,7 +308,11 @@ class MockDb {
 
   private validateTotal(candidate: ScoringRule[]): string | null {
     for (const r of candidate) {
-      if (!Number.isInteger(r.weight_percentage) || r.weight_percentage < 0 || r.weight_percentage > 100) {
+      if (
+        !Number.isInteger(r.weight_percentage) ||
+        r.weight_percentage < 0 ||
+        r.weight_percentage > 100
+      ) {
         return `weight_percentage for ${r.metric_name} must be an integer between 0 and 100.`;
       }
     }
@@ -317,7 +323,11 @@ class MockDb {
     return null;
   }
 
-  updateRule(id: string, patch: UpdateRuleRequest, actor: AuthUser): { error?: string; rule?: ScoringRule; duration_ms?: number } {
+  updateRule(
+    id: string,
+    patch: UpdateRuleRequest,
+    actor: AuthUser,
+  ): { error?: string; rule?: ScoringRule; duration_ms?: number } {
     const idx = this.rules.findIndex((r) => r.id === id);
     if (idx === -1) return { error: "not_found" };
     const before = this.rules[idx];
@@ -337,7 +347,10 @@ class MockDb {
     return { rule: { ...after }, duration_ms: duration };
   }
 
-  bulkUpdateRules(body: BulkUpdateRulesRequest, actor: AuthUser): { error?: string; result?: BulkUpdateRulesResponse } {
+  bulkUpdateRules(
+    body: BulkUpdateRulesRequest,
+    actor: AuthUser,
+  ): { error?: string; result?: BulkUpdateRulesResponse } {
     const byId = new Map(body.rules.map((r) => [r.id, r]));
     const befores = new Map(this.rules.map((r) => [r.id, r]));
     const now = new Date().toISOString();
@@ -386,7 +399,12 @@ class MockDb {
   }
 
   private diff(before: ScoringRule, after: ScoringRule) {
-    const keys: Array<keyof ScoringRule> = ["weight_percentage", "impact_direction", "threshold", "is_active"];
+    const keys: Array<keyof ScoringRule> = [
+      "weight_percentage",
+      "impact_direction",
+      "threshold",
+      "is_active",
+    ];
     const b: Record<string, unknown> = {};
     const a: Record<string, unknown> = {};
     for (const k of keys) {
@@ -422,7 +440,8 @@ class MockDb {
     const offset = Math.max(params.offset ?? 0, 0);
     let rows = this.audit;
     if (params.actor) rows = rows.filter((r) => r.actor.email === params.actor);
-    if (params.from) rows = rows.filter((r) => r.created_at >= new Date(params.from!).toISOString());
+    if (params.from)
+      rows = rows.filter((r) => r.created_at >= new Date(params.from!).toISOString());
     if (params.to) {
       const end = new Date(params.to);
       end.setHours(23, 59, 59, 999);
@@ -453,8 +472,14 @@ class MockDb {
         if (jitter() > 0.2) continue;
         const next: Partial<Record<MetricName, number>> = {};
         next.product_usage = Math.max(0, acc.raw.product_usage + Math.round((jitter() - 0.5) * 10));
-        next.support_tickets = Math.max(0, acc.raw.support_tickets + Math.round((jitter() - 0.5) * 3));
-        next.overdue_invoice = Math.max(0, acc.raw.overdue_invoice + Math.round((jitter() - 0.55) * 2));
+        next.support_tickets = Math.max(
+          0,
+          acc.raw.support_tickets + Math.round((jitter() - 0.5) * 3),
+        );
+        next.overdue_invoice = Math.max(
+          0,
+          acc.raw.overdue_invoice + Math.round((jitter() - 0.55) * 2),
+        );
         acc.raw = { ...acc.raw, ...next };
         this.rawOverrides[acc.id] = { ...acc.raw };
       }

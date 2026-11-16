@@ -59,10 +59,12 @@ const columns = helper.columns([
         .toUpperCase();
       return (
         <div className="flex items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-surface-raised border border-white/[0.08] text-[11px] font-medium text-text-muted">
+          <span className="bg-surface-raised border-border text-text-muted flex size-7 shrink-0 items-center justify-center rounded-lg border text-[11px] font-medium">
             {initials}
           </span>
-          <span className="font-medium text-text group-hover:text-white transition-colors">{name}</span>
+          <span className="text-text group-hover:text-text font-medium transition-colors">
+            {name}
+          </span>
         </div>
       );
     },
@@ -72,12 +74,11 @@ const columns = helper.columns([
     sortDescFirst: false,
     cell: (info) => {
       const score = info.getValue();
-      const barColor =
-        score <= 30 ? "bg-rose-500" : score <= 70 ? "bg-amber-400" : "bg-emerald-500";
+      const barColor = score <= 30 ? "bg-danger" : score <= 70 ? "bg-warning" : "bg-success";
       return (
         <div className="flex items-center gap-2.5">
-          <span className={`num text-sm font-semibold w-7 ${scoreTextClass(score)}`}>{score}</span>
-          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/[0.06]">
+          <span className={`num w-7 text-sm font-semibold ${scoreTextClass(score)}`}>{score}</span>
+          <div className="bg-surface-raised h-1.5 w-16 overflow-hidden rounded-full">
             <div
               className={`h-full rounded-full transition-all duration-300 ${barColor}`}
               style={{ width: `${score}%` }}
@@ -101,13 +102,15 @@ const columns = helper.columns([
   helper.accessor("arr", {
     header: "ARR",
     enableGlobalFilter: false,
-    cell: (info) => <span className="num text-sm text-text font-medium">{formatCurrency(info.getValue())}</span>,
+    cell: (info) => (
+      <span className="num text-text text-sm font-medium">{formatCurrency(info.getValue())}</span>
+    ),
   }),
   helper.accessor("last_active_at", {
     header: "Last Active",
     enableGlobalFilter: false,
     sortUndefined: "last",
-    cell: (info) => <span className="text-xs text-text-muted">{formatDate(info.getValue())}</span>,
+    cell: (info) => <span className="text-text-muted text-xs">{formatDate(info.getValue())}</span>,
   }),
   helper.display({
     id: "actions",
@@ -118,7 +121,7 @@ const columns = helper.columns([
         <Link
           href={`/accounts/${row.original.id}`}
           onClick={(event) => event.stopPropagation()}
-          className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+          className="text-primary hover:text-primary inline-flex items-center gap-1 text-xs font-medium transition-colors"
         >
           <span>Open</span>
           <ChevronRight className="size-3.5" />
@@ -174,7 +177,8 @@ export function AccountDataGrid({
   }, [statusFromUrl]);
 
   const search = typeof table.state.globalFilter === "string" ? table.state.globalFilter : "";
-  const statusFilter = (table.getColumn("health_status")?.getFilterValue() as HealthStatus | undefined) ?? "";
+  const statusFilter =
+    (table.getColumn("health_status")?.getFilterValue() as HealthStatus | undefined) ?? "";
   const pageIndex = table.state.pagination.pageIndex;
   const pageSize = table.state.pagination.pageSize;
   const filteredCount = table.getPrePaginatedRowModel().rows.length;
@@ -192,8 +196,8 @@ export function AccountDataGrid({
   };
 
   return (
-    <Card className="animate-fade-in-up">
-      <div className="flex flex-col gap-3 border-b border-white/[0.06] bg-white/[0.01] px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
+    <Card className="">
+      <div className="border-border bg-surface-raised flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-end">
           <div className="min-w-0 flex-1 sm:max-w-sm">
             <Input
@@ -227,7 +231,7 @@ export function AccountDataGrid({
           </div>
         </div>
 
-        <div className="text-xs text-text-muted self-start sm:self-end pb-1.5">
+        <div className="text-text-muted self-start pb-1.5 text-xs sm:self-end">
           <span className="num text-text font-semibold">{formatNumber(filteredCount)}</span>
           <span> of </span>
           <span className="num">{formatNumber(data.length)}</span>
@@ -236,7 +240,7 @@ export function AccountDataGrid({
             <button
               type="button"
               onClick={() => setStatusFilter("")}
-              className="ml-2 text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+              className="text-primary hover:text-primary ml-2 cursor-pointer transition-colors"
             >
               Clear filter
             </button>
@@ -255,7 +259,7 @@ export function AccountDataGrid({
             statusFilter || search ? (
               <button
                 type="button"
-                className="text-xs font-medium text-blue-400 hover:text-blue-300 cursor-pointer"
+                className="text-primary hover:text-primary cursor-pointer text-xs font-medium"
                 onClick={() => {
                   table.setGlobalFilter("");
                   setStatusFilter("");
@@ -267,20 +271,24 @@ export function AccountDataGrid({
           }
         />
       ) : (
-        <div className="overflow-x-auto max-h-[min(70vh,44rem)]">
+        <div className="max-h-[min(70vh,44rem)] overflow-x-auto">
           <table className="table-sticky-head w-full min-w-[720px] border-collapse text-left text-sm">
-            <thead className="border-b border-white/[0.06] text-[11px] font-medium uppercase tracking-wider text-text-muted">
+            <thead className="border-border text-text-muted border-b text-[11px] font-medium tracking-wider uppercase">
               {table.getHeaderGroups().map((group) => (
                 <tr key={group.id}>
                   {group.headers.map((header) => {
                     const sortable = header.column.getCanSort();
                     const sorted = header.column.getIsSorted();
                     return (
-                      <th key={header.id} className="px-5 py-3.5 font-medium" aria-sort={ariaSort(sorted)}>
+                      <th
+                        key={header.id}
+                        className="px-5 py-3.5 font-medium"
+                        aria-sort={ariaSort(sorted)}
+                      >
                         {header.isPlaceholder ? null : sortable ? (
                           <button
                             type="button"
-                            className="group inline-flex items-center gap-1.5 text-left hover:text-white transition-colors cursor-pointer select-none"
+                            className="group hover:text-text inline-flex cursor-pointer items-center gap-1.5 text-left transition-colors select-none"
                             onClick={header.column.getToggleSortingHandler()}
                           >
                             <table.FlexRender header={header} />
@@ -295,12 +303,12 @@ export function AccountDataGrid({
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-border-subtle divide-y">
               {rows.map((row) => (
                 <tr
                   key={row.id}
                   tabIndex={0}
-                  className="group cursor-pointer transition-colors duration-150 hover:bg-white/[0.04] focus-visible:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500/30"
+                  className="group hover:bg-surface-raised focus-visible:bg-surface-raised cursor-pointer transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:outline-none focus-visible:ring-inset"
                   onClick={() => router.push(`/accounts/${row.original.id}`)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
@@ -342,7 +350,9 @@ function ariaSort(direction: false | "asc" | "desc"): "ascending" | "descending"
 }
 
 function SortIcon({ direction }: { direction: false | "asc" | "desc" }) {
-  if (direction === "asc") return <ArrowUp className="size-3 text-blue-400" aria-hidden />;
-  if (direction === "desc") return <ArrowDown className="size-3 text-blue-400" aria-hidden />;
-  return <ArrowUpDown className="size-3 text-text-muted/50 group-hover:text-text-muted" aria-hidden />;
+  if (direction === "asc") return <ArrowUp className="text-primary size-3" aria-hidden />;
+  if (direction === "desc") return <ArrowDown className="text-primary size-3" aria-hidden />;
+  return (
+    <ArrowUpDown className="text-text-muted/50 group-hover:text-text-muted size-3" aria-hidden />
+  );
 }

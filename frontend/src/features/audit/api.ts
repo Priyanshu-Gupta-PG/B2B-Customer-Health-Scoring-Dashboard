@@ -1,7 +1,9 @@
 import { apiClient } from "@/lib/axiosClient";
 import type { AuditLogEntry, AuditLogParams, Paginated } from "@/types/api";
 
-export async function fetchAuditLogs(params: AuditLogParams = {}): Promise<Paginated<AuditLogEntry>> {
+export async function fetchAuditLogs(
+  params: AuditLogParams = {},
+): Promise<Paginated<AuditLogEntry>> {
   const { data } = await apiClient.get<Paginated<AuditLogEntry>>("/audit-logs", { params });
   return data;
 }

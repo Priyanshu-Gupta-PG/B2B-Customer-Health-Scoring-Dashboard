@@ -21,17 +21,18 @@ export function Pagination({
   const from = total === 0 ? 0 : pageIndex * pageSize + 1;
   const to = Math.min(total, (pageIndex + 1) * pageSize);
   return (
-    <div className="flex flex-col gap-3 border-t border-border px-5 py-3 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-border text-text-muted flex flex-col gap-3 border-t px-5 py-3 text-xs sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3">
         <span>
-          Showing <span className="num text-text">{from}</span>–<span className="num text-text">{to}</span> of{" "}
+          Showing <span className="num text-text">{from}</span>–
+          <span className="num text-text">{to}</span> of{" "}
           <span className="num text-text">{total}</span>
         </span>
         {onPageSizeChange && (
           <label className="flex items-center gap-1.5">
             Rows
             <select
-              className="h-7 rounded-md border border-border bg-bg px-1.5 text-xs text-text"
+              className="border-border bg-bg text-text h-7 rounded-md border px-1.5 text-xs"
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
             >
@@ -45,7 +46,13 @@ export function Pagination({
         )}
       </div>
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="sm" onClick={() => onPageChange(0)} disabled={pageIndex === 0} aria-label="First page">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onPageChange(0)}
+          disabled={pageIndex === 0}
+          aria-label="First page"
+        >
           <ChevronsLeft className="size-4" />
         </Button>
         <Button

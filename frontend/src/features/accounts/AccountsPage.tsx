@@ -32,16 +32,20 @@ function AccountsPageInner() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/[0.06] pb-5">
+      <div className="border-border flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-text">Customer Portfolio</h1>
-          <p className="text-text-muted text-sm mt-1">
+          <h1 className="text-text text-2xl font-semibold tracking-tight">Customer Portfolio</h1>
+          <p className="text-text-muted mt-1 text-sm">
             Search, sort, and triage account health across the managed book.
           </p>
         </div>
 
         {!isPending && total > 0 && (
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by health status">
+          <div
+            className="flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label="Filter by health status"
+          >
             <StatusChip
               href="/accounts?status=Healthy"
               active={activeStatus === "Healthy"}
@@ -100,15 +104,15 @@ function StatusChip({
   icon: ReactNode;
 }) {
   const tones = {
-    healthy: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/15",
-    risk: "border-amber-500/25 bg-amber-500/10 text-amber-300 hover:bg-amber-500/15",
-    critical: "border-rose-500/25 bg-rose-500/10 text-rose-300 hover:bg-rose-500/15",
+    healthy: "border-success/25 bg-success-subtle text-success hover:bg-success-subtle",
+    risk: "border-warning/25 bg-warning-subtle text-warning hover:bg-warning-subtle",
+    critical: "border-danger/25 bg-danger-subtle text-danger hover:bg-danger-subtle",
   } as const;
 
   const activeRing = {
-    healthy: "ring-2 ring-emerald-400/40",
-    risk: "ring-2 ring-amber-400/40",
-    critical: "ring-2 ring-rose-400/40",
+    healthy: "ring-2 ring-success/35",
+    risk: "ring-2 ring-warning/35",
+    critical: "ring-2 ring-danger/35",
   } as const;
 
   return (
@@ -132,9 +136,9 @@ function StatusChip({
 function AccountsPageFallback() {
   return (
     <div className="space-y-6">
-      <div className="border-b border-white/[0.06] pb-5">
-        <h1 className="text-2xl font-semibold tracking-tight text-text">Customer Portfolio</h1>
-        <p className="text-text-muted text-sm mt-1">Loading account directory…</p>
+      <div className="border-border border-b pb-5">
+        <h1 className="text-text text-2xl font-semibold tracking-tight">Customer Portfolio</h1>
+        <p className="text-text-muted mt-1 text-sm">Loading account directory…</p>
       </div>
     </div>
   );

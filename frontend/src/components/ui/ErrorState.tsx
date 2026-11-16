@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "./Button";
 import { cn } from "@/lib/cn";
@@ -16,12 +17,15 @@ export function ErrorState({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center px-6 py-14 text-center", className)} role="alert">
-      <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-danger/15 text-danger">
+    <div
+      className={cn("flex flex-col items-center justify-center px-6 py-14 text-center", className)}
+      role="alert"
+    >
+      <div className="bg-danger-subtle text-danger mb-4 flex size-10 items-center justify-center rounded-md">
         <AlertTriangle className="size-5" />
       </div>
-      <h3 className="text-sm font-semibold text-text">{title}</h3>
-      {message && <p className="mt-1 max-w-md text-sm text-text-muted">{message}</p>}
+      <h3 className="text-text text-sm font-semibold">{title}</h3>
+      {message && <p className="text-text-muted mt-1 max-w-md text-sm">{message}</p>}
       {onRetry && (
         <Button variant="secondary" size="sm" className="mt-5" onClick={onRetry} loading={retrying}>
           <RefreshCw className="size-3.5" /> Retry
@@ -37,16 +41,23 @@ export function AlertBanner({
   className,
 }: {
   tone?: "danger" | "warning" | "info";
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   const tones = {
-    danger: "border-danger/40 bg-danger/10 text-danger",
-    warning: "border-warning/40 bg-warning/10 text-warning",
-    info: "border-primary/40 bg-primary/10 text-blue-300",
+    danger: "border-danger/30 bg-danger-subtle text-danger",
+    warning: "border-warning/30 bg-warning-subtle text-warning",
+    info: "border-primary/30 bg-primary-subtle text-primary",
   };
   return (
-    <div className={cn("flex items-start gap-3 rounded-lg border px-4 py-3 text-sm", tones[tone], className)} role="alert">
+    <div
+      className={cn(
+        "flex items-start gap-3 rounded-md border px-4 py-3 text-sm",
+        tones[tone],
+        className,
+      )}
+      role="alert"
+    >
       <AlertTriangle className="mt-0.5 size-4 shrink-0" />
       <div className="min-w-0 flex-1">{children}</div>
     </div>

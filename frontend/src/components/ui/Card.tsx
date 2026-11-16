@@ -9,8 +9,8 @@ export function Card({ className, hoverable = false, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "card-premium rounded-card overflow-hidden",
-        hoverable && "card-premium-hover",
+        "panel overflow-hidden",
+        hoverable && "panel-hover transition-colors",
         className,
       )}
       {...props}
@@ -32,7 +32,7 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 border-b border-border/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        "border-border flex flex-col gap-2 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
         className,
       )}
     >
@@ -46,5 +46,5 @@ export function CardHeader({
 }
 
 export function CardBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("p-5", className)} {...props} />;
+  return <div className={cn("p-4", className)} {...props} />;
 }

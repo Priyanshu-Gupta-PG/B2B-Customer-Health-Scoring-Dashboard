@@ -3,10 +3,7 @@
 import { catchError, type ErrorInfo } from "next/error";
 import { ErrorState } from "./ErrorState";
 
-function SectionErrorFallback(
-  { title }: { title?: string },
-  { retry }: ErrorInfo,
-) {
+function SectionErrorFallback({ title }: { title?: string }, { retry }: ErrorInfo) {
   return (
     <ErrorState
       title={title ?? "This section failed to render"}

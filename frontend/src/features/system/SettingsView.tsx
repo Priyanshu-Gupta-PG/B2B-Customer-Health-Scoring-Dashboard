@@ -48,7 +48,7 @@ export function SettingsView() {
         actions={
           isAdmin ? (
             <Button
-              className="w-full sm:w-auto gap-2"
+              className="w-full gap-2 sm:w-auto"
               onClick={() => void runIngestion()}
               loading={ingest.isPending}
               disabled={running}
@@ -100,13 +100,13 @@ function HealthStatusGrid({ data, isAdmin }: { data: HealthResponse; isAdmin: bo
   const dbConnected = data.postgres === "connected";
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 animate-fade-in-up">
+    <div className="grid gap-6 md:grid-cols-2">
       {/* API Ingestion Card */}
       <Card hoverable>
         <CardHeader
           title={
             <span className="flex items-center gap-2">
-              <Zap className="size-4 text-blue-400" />
+              <Zap className="text-primary size-4" />
               Automated Ingestion Pipeline
             </span>
           }
@@ -115,31 +115,39 @@ function HealthStatusGrid({ data, isAdmin }: { data: HealthResponse; isAdmin: bo
         />
         <CardBody className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl border border-white/[0.06] bg-surface-raised/40 p-3.5">
-              <p className="text-text-muted text-[11px] font-semibold uppercase tracking-wider">Last Sync Run</p>
-              <p className="text-text mt-1 text-sm font-semibold truncate">
+            <div className="border-border bg-surface-raised/40 rounded-xl border p-3.5">
+              <p className="text-text-muted text-[11px] font-semibold tracking-wider uppercase">
+                Last Sync Run
+              </p>
+              <p className="text-text mt-1 truncate text-sm font-semibold">
                 {data.last_ingestion_at ? formatRelative(data.last_ingestion_at) : "Waiting"}
               </p>
-              <p className="text-text-muted text-[11px] mt-0.5 truncate">
+              <p className="text-text-muted mt-0.5 truncate text-[11px]">
                 {data.last_ingestion_at ? formatDateTime(data.last_ingestion_at) : "Never"}
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/[0.06] bg-surface-raised/40 p-3.5">
-              <p className="text-text-muted text-[11px] font-semibold uppercase tracking-wider">Next Scheduled Sync</p>
-              <p className="text-text mt-1 text-sm font-semibold truncate">
+            <div className="border-border bg-surface-raised/40 rounded-xl border p-3.5">
+              <p className="text-text-muted text-[11px] font-semibold tracking-wider uppercase">
+                Next Scheduled Sync
+              </p>
+              <p className="text-text mt-1 truncate text-sm font-semibold">
                 {data.next_ingestion_at ? formatRelative(data.next_ingestion_at) : "—"}
               </p>
-              <p className="text-text-muted text-[11px] mt-0.5 truncate">
+              <p className="text-text-muted mt-0.5 truncate text-[11px]">
                 {data.next_ingestion_at ? formatDateTime(data.next_ingestion_at) : "Pending"}
               </p>
             </div>
           </div>
 
-          <div className="border-t border-white/[0.06] pt-4 text-xs text-text-muted flex items-center justify-between">
-            <span>Cadence: <span className="font-mono text-text">*/15 * * * *</span> (Every 15 min)</span>
+          <div className="border-border text-text-muted flex items-center justify-between border-t pt-4 text-xs">
+            <span>
+              Cadence: <span className="text-text font-mono">*/15 * * * *</span> (Every 15 min)
+            </span>
             {!isAdmin && (
-              <span className="text-[11px] text-amber-400">Admin privileges required to force sync</span>
+              <span className="text-warning text-[11px]">
+                Admin privileges required to force sync
+              </span>
             )}
           </div>
         </CardBody>
@@ -150,7 +158,7 @@ function HealthStatusGrid({ data, isAdmin }: { data: HealthResponse; isAdmin: bo
         <CardHeader
           title={
             <span className="flex items-center gap-2">
-              <Server className="size-4 text-emerald-400" />
+              <Server className="text-success size-4" />
               Database & Microservices
             </span>
           }
@@ -160,12 +168,12 @@ function HealthStatusGrid({ data, isAdmin }: { data: HealthResponse; isAdmin: bo
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold backdrop-blur-sm",
                 dbConnected
-                  ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                  : "border-rose-500/20 bg-rose-500/10 text-rose-300",
+                  ? "border-success/25 bg-success-subtle text-success"
+                  : "border-danger/25 bg-danger-subtle text-danger",
               )}
             >
               <span
-                className={cn("size-1.5 rounded-full", dbConnected ? "bg-emerald-400 animate-pulse" : "bg-rose-400")}
+                className={cn("size-1.5 rounded-sm", dbConnected ? "bg-success" : "bg-danger")}
                 aria-hidden
               />
               {dbConnected ? "Operational" : "Disconnected"}
@@ -173,24 +181,32 @@ function HealthStatusGrid({ data, isAdmin }: { data: HealthResponse; isAdmin: bo
           }
         />
         <CardBody className="space-y-4">
-          <dl className="grid gap-4 sm:grid-cols-2 text-sm">
-            <div className="rounded-xl border border-white/[0.06] bg-surface-raised/40 p-3.5">
-              <dt className="text-text-muted text-[11px] font-semibold uppercase tracking-wider">Overall API Health</dt>
-              <dd className="text-text mt-1 text-sm font-semibold capitalize flex items-center gap-1.5">
-                <CheckCircle2 className="size-4 text-emerald-400" />
+          <dl className="grid gap-4 text-sm sm:grid-cols-2">
+            <div className="border-border bg-surface-raised/40 rounded-xl border p-3.5">
+              <dt className="text-text-muted text-[11px] font-semibold tracking-wider uppercase">
+                Overall API Health
+              </dt>
+              <dd className="text-text mt-1 flex items-center gap-1.5 text-sm font-semibold capitalize">
+                <CheckCircle2 className="text-success size-4" />
                 {data.status === "ok" ? "All Systems Nominal" : data.status}
               </dd>
             </div>
 
-            <div className="rounded-xl border border-white/[0.06] bg-surface-raised/40 p-3.5">
-              <dt className="text-text-muted text-[11px] font-semibold uppercase tracking-wider">Engine Uptime</dt>
-              <dd className="num text-text mt-1 text-sm font-semibold">{formatUptime(data.uptime_seconds)}</dd>
+            <div className="border-border bg-surface-raised/40 rounded-xl border p-3.5">
+              <dt className="text-text-muted text-[11px] font-semibold tracking-wider uppercase">
+                Engine Uptime
+              </dt>
+              <dd className="num text-text mt-1 text-sm font-semibold">
+                {formatUptime(data.uptime_seconds)}
+              </dd>
             </div>
 
-            <div className="sm:col-span-2 rounded-xl border border-white/[0.06] bg-surface-raised/40 p-3.5 flex items-center justify-between">
+            <div className="border-border bg-surface-raised/40 flex items-center justify-between rounded-xl border p-3.5 sm:col-span-2">
               <div>
-                <dt className="text-text-muted text-[11px] font-semibold uppercase tracking-wider">PostgreSQL Connection</dt>
-                <dd className="text-text mt-1 text-xs font-mono">
+                <dt className="text-text-muted text-[11px] font-semibold tracking-wider uppercase">
+                  PostgreSQL Connection
+                </dt>
+                <dd className="text-text mt-1 font-mono text-xs">
                   {dbConnected ? "Pooled connection active" : "Offline / Unreachable"}
                 </dd>
               </div>

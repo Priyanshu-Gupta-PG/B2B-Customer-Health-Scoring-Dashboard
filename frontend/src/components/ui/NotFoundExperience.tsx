@@ -17,12 +17,12 @@ export function NotFoundExperience({
       <div className="border-border bg-surface text-text-muted mb-5 flex size-14 items-center justify-center rounded-full border">
         <SearchX className="size-6" />
       </div>
-      <p className="num text-xs font-medium tracking-[0.2em] text-blue-300">404</p>
+      <p className="num text-primary text-xs font-medium tracking-[0.2em]">404</p>
       <h1 className="text-text mt-2 text-xl font-semibold sm:text-2xl">{title}</h1>
       <p className="text-text-muted mt-2 max-w-md text-sm">{description}</p>
       <Link
         href={href}
-        className="bg-primary hover:bg-primary-hover mt-6 inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-white"
+        className="bg-primary hover:bg-primary-hover text-text mt-6 inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium"
       >
         {actionLabel}
       </Link>

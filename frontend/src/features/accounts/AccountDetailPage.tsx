@@ -69,7 +69,7 @@ export function AccountDetailPage({ accountId }: { accountId: string }) {
         breadcrumb={
           <Link
             href="/accounts"
-            className="group inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-white transition-colors"
+            className="group text-text-muted hover:text-text inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
           >
             <ArrowLeft className="size-3 transition-transform duration-200 group-hover:-translate-x-0.5" />
             <span>Accounts Directory</span>
@@ -81,8 +81,8 @@ export function AccountDetailPage({ accountId }: { accountId: string }) {
           </div>
         }
         description={
-          <div className="flex flex-wrap items-center gap-2 mt-1">
-            <span className="font-mono text-text-muted">{account.domain}</span>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <span className="text-text-muted font-mono">{account.domain}</span>
             <span className="text-text-subtle">·</span>
             <span className="text-text-muted">{account.plan} Tier</span>
             <span className="text-text-subtle">·</span>
@@ -94,10 +94,10 @@ export function AccountDetailPage({ accountId }: { accountId: string }) {
       {isAtRisk && (
         <div
           className={cn(
-            "rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fade-in-up",
+            "flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between",
             account.current_score <= 30
-              ? "border-rose-500/30 bg-rose-500/10"
-              : "border-amber-500/30 bg-amber-500/10",
+              ? "border-danger/30 bg-danger-subtle"
+              : "border-warning/30 bg-warning-subtle",
           )}
         >
           <div className="flex items-center gap-3">
@@ -105,8 +105,8 @@ export function AccountDetailPage({ accountId }: { accountId: string }) {
               className={cn(
                 "flex size-8 shrink-0 items-center justify-center rounded-lg",
                 account.current_score <= 30
-                  ? "bg-rose-500/20 text-rose-300"
-                  : "bg-amber-500/20 text-amber-300",
+                  ? "bg-danger-subtle text-danger"
+                  : "bg-warning-subtle text-warning",
               )}
             >
               <ShieldAlert className="size-4" />
@@ -115,26 +115,27 @@ export function AccountDetailPage({ accountId }: { accountId: string }) {
               <p
                 className={cn(
                   "text-xs font-semibold",
-                  account.current_score <= 30 ? "text-rose-300" : "text-amber-300",
+                  account.current_score <= 30 ? "text-danger" : "text-warning",
                 )}
               >
                 {account.current_score <= 30 ? "Critical — prioritize outreach" : "Elevated risk"}
               </p>
               <p
                 className={cn(
-                  "text-[11px] mt-0.5",
-                  account.current_score <= 30 ? "text-rose-200/80" : "text-amber-200/80",
+                  "mt-0.5 text-[11px]",
+                  account.current_score <= 30 ? "text-danger" : "text-warning",
                 )}
               >
-                Score {account.current_score}/100. Check support load, usage drop-off, or overdue invoices below.
+                Score {account.current_score}/100. Check support load, usage drop-off, or overdue
+                invoices below.
               </p>
             </div>
           </div>
           <Link
             href="/rules"
             className={cn(
-              "shrink-0 text-xs font-medium hover:text-white underline",
-              account.current_score <= 30 ? "text-rose-300" : "text-amber-300",
+              "hover:text-text shrink-0 text-xs font-medium underline",
+              account.current_score <= 30 ? "text-danger" : "text-warning",
             )}
           >
             Review scoring formula

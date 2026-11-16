@@ -6,10 +6,10 @@ import { cn } from "@/lib/cn";
 import { useToastStore, type Toast } from "./toast";
 
 const icon = {
-  success: <CheckCircle2 className="size-4 text-success" />,
-  error: <XCircle className="size-4 text-danger" />,
-  warning: <AlertTriangle className="size-4 text-warning" />,
-  info: <Info className="size-4 text-primary" />,
+  success: <CheckCircle2 className="text-success size-4" />,
+  error: <XCircle className="text-danger size-4" />,
+  warning: <AlertTriangle className="text-warning size-4" />,
+  info: <Info className="text-primary size-4" />,
 };
 
 function ToastItem({ toast }: { toast: Toast }) {
@@ -23,19 +23,19 @@ function ToastItem({ toast }: { toast: Toast }) {
     <div
       role="status"
       className={cn(
-        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border border-border bg-surface px-4 py-3 shadow-xl shadow-black/40",
+        "border-border bg-surface pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border px-4 py-3 shadow-xl shadow-black/40",
       )}
     >
       <span className="mt-0.5 shrink-0">{icon[toast.tone]}</span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-text">{toast.title}</p>
-        {toast.description && <p className="mt-0.5 text-xs text-text-muted">{toast.description}</p>}
+        <p className="text-text text-sm font-medium">{toast.title}</p>
+        {toast.description && <p className="text-text-muted mt-0.5 text-xs">{toast.description}</p>}
       </div>
       <button
         type="button"
         onClick={() => dismiss(toast.id)}
         aria-label="Dismiss"
-        className="rounded p-0.5 text-text-muted hover:text-text"
+        className="text-text-muted hover:text-text rounded p-0.5"
       >
         <X className="size-3.5" />
       </button>

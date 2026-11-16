@@ -22,7 +22,10 @@ function problem(status: number, title: string, detail: string, instance?: strin
     detail,
     instance,
   };
-  return HttpResponse.json(body, { status, headers: { "Content-Type": "application/problem+json" } });
+  return HttpResponse.json(body, {
+    status,
+    headers: { "Content-Type": "application/problem+json" },
+  });
 }
 
 function jitter() {
@@ -34,7 +37,12 @@ function authenticate(request: Request): AuthUser | Response {
   const token = header?.startsWith("Bearer ") ? header.slice(7) : null;
   const user = mockDb().userFromToken(token);
   if (!user) {
-    return problem(401, "Unauthorized", "A valid bearer token is required.", new URL(request.url).pathname);
+    return problem(
+      401,
+      "Unauthorized",
+      "A valid bearer token is required.",
+      new URL(request.url).pathname,
+    );
   }
   return user;
 }
@@ -56,11 +64,21 @@ export const handlers = [
     await jitter();
     const body = (await request.json().catch(() => null)) as LoginRequest | null;
     if (!body?.email || !body?.password) {
-      return problem(422, "Validation Error", "Email and password are required.", "/api/v1/auth/login");
+      return problem(
+        422,
+        "Validation Error",
+        "Email and password are required.",
+        "/api/v1/auth/login",
+      );
     }
     const session = mockDb().login(body.email, body.password);
     if (!session) {
-      return problem(401, "Invalid credentials", "Email or password is incorrect.", "/api/v1/auth/login");
+      return problem(
+        401,
+        "Invalid credentials",
+        "Email or password is incorrect.",
+        "/api/v1/auth/login",
+      );
     }
     return HttpResponse.json(session);
   }),
@@ -90,7 +108,8 @@ export const handlers = [
     if (!isUser(auth)) return auth;
     await jitter();
     const account = mockDb().getAccount(String(params.id));
-    if (!account) return problem(404, "Not Found", "Account not found.", `/api/v1/accounts/${params.id}`);
+    if (!account)
+      return problem(404, "Not Found", "Account not found.", `/api/v1/accounts/${params.id}`);
     return HttpResponse.json(account);
   }),
 
@@ -133,7 +152,8 @@ export const handlers = [
     if (!body) return problem(422, "Validation Error", "Request body must be JSON.");
     const result = mockDb().updateRule(String(params.id), body, auth);
     if (result.error === "not_found") return problem(404, "Not Found", "Rule not found.");
-    if (result.error) return problem(422, "Validation Error", result.error, `/api/v1/rules/${params.id}`);
+    if (result.error)
+      return problem(422, "Validation Error", result.error, `/api/v1/rules/${params.id}`);
     return HttpResponse.json({
       message: "Rule updated successfully. Batch recalculation triggered.",
       rule: result.rule,
@@ -187,7 +207,12 @@ export const handlers = [
     await jitter();
     const { already } = mockDb().triggerIngest(auth);
     if (already) {
-      return problem(409, "Conflict", "An ingestion job is already running.", "/api/v1/ingest/trigger");
+      return problem(
+        409,
+        "Conflict",
+        "An ingestion job is already running.",
+        "/api/v1/ingest/trigger",
+      );
     }
     return HttpResponse.json(
       { status: "processing", message: "Manual ingestion job queued." },

@@ -27,6 +27,9 @@ const RANGE_LABEL: Record<HistoryRange, string> = {
   90: "90 days",
 };
 
+const AXIS = "#8b95a5";
+const GRID = "var(--border-subtle)";
+
 export function HealthTrendChart({
   data,
   days,
@@ -46,11 +49,17 @@ export function HealthTrendChart({
   const stroke = STATUS_COLOR[getStatusTier(latest)];
 
   return (
-    <Card className="flex min-h-[22rem] flex-col animate-fade-in-up stagger-1">
+    <Card className="flex min-h-[22rem] flex-col">
       <CardHeader
-        title="Historical Health Trajectory"
-        description="Daily snapshot snapshots of the composite 0–100 health score"
-        action={<RangeToggle days={days} onDaysChange={onDaysChange} disabled={isLoading && data.length === 0} />}
+        title="Health history"
+        description="Daily composite score snapshots"
+        action={
+          <RangeToggle
+            days={days}
+            onDaysChange={onDaysChange}
+            disabled={isLoading && data.length === 0}
+          />
+        }
       />
       <CardBody className="flex flex-1 flex-col">
         {isError ? (
@@ -65,37 +74,40 @@ export function HealthTrendChart({
               <AreaChart data={data} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                 <defs>
                   <linearGradient id="scoreAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={stroke} stopOpacity={0.25} />
-                    <stop offset="95%" stopColor={stroke} stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={stroke} stopOpacity={0.2} />
+                    <stop offset="95%" stopColor={stroke} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
                 <XAxis
                   dataKey="date"
                   tickFormatter={formatAxisDate}
-                  tick={{ fill: "#949ca8", fontSize: 11 }}
-                  axisLine={{ stroke: "rgba(255, 255, 255, 0.07)" }}
+                  tick={{ fill: AXIS, fontSize: 11 }}
+                  axisLine={{ stroke: "var(--border)" }}
                   tickLine={false}
                   minTickGap={days === 7 ? 8 : 24}
                 />
                 <YAxis
                   domain={[0, 100]}
                   ticks={[0, 30, 70, 100]}
-                  tick={{ fill: "#949ca8", fontSize: 11, fontFamily: "var(--font-mono)" }}
+                  tick={{ fill: AXIS, fontSize: 11, fontFamily: "var(--font-mono)" }}
                   axisLine={false}
                   tickLine={false}
                   width={40}
                 />
-                <Tooltip content={<ScoreTooltip />} cursor={{ stroke: "rgba(255, 255, 255, 0.15)", strokeWidth: 1 }} />
+                <Tooltip
+                  content={<ScoreTooltip />}
+                  cursor={{ stroke: "var(--border-focus)", strokeWidth: 1 }}
+                />
                 <Area
                   type="monotone"
                   dataKey="score"
                   name="Health score"
                   stroke={stroke}
-                  strokeWidth={2.5}
+                  strokeWidth={2}
                   fill="url(#scoreAreaGradient)"
                   dot={days === 7 ? { r: 3, fill: stroke } : false}
-                  activeDot={{ r: 5, fill: stroke, stroke: "#11141a", strokeWidth: 2 }}
+                  activeDot={{ r: 4, fill: stroke, stroke: "var(--surface)", strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -116,7 +128,11 @@ function RangeToggle({
   disabled?: boolean;
 }) {
   return (
-    <div className="inline-flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5" role="group" aria-label="History range">
+    <div
+      className="border-border bg-surface-raised inline-flex rounded-md border p-0.5"
+      role="group"
+      aria-label="History range"
+    >
       {HISTORY_RANGES.map((range) => {
         const active = range === days;
         return (
@@ -127,10 +143,10 @@ function RangeToggle({
             aria-pressed={active}
             onClick={() => onDaysChange(range)}
             className={cn(
-              "h-7 rounded-md px-2.5 text-xs font-medium transition-all duration-150 disabled:opacity-40 cursor-pointer select-none",
+              "h-7 cursor-pointer rounded px-2.5 text-xs font-medium transition-colors select-none disabled:opacity-40",
               active
-                ? "bg-white/[0.1] text-white shadow-sm border border-white/[0.08]"
-                : "text-text-muted hover:text-text hover:bg-white/[0.04]",
+                ? "bg-surface text-text border-border border"
+                : "text-text-muted hover:text-text",
             )}
           >
             {RANGE_LABEL[range]}
@@ -158,10 +174,10 @@ function ScoreTooltip({
   if (!active || !payload?.length || !label) return null;
   const score = payload[0]?.value ?? 0;
   return (
-    <div className="card-premium rounded-xl px-3.5 py-2.5 text-xs shadow-xl border border-white/10 backdrop-blur-md">
+    <div className="panel rounded-md px-3 py-2 text-xs shadow-md">
       <p className="text-text-muted text-[11px]">{formatAxisDate(label)}</p>
       <div className="mt-1 flex items-center gap-2">
-        <span className="num text-base font-bold text-white">{score}</span>
+        <span className="num text-text text-base font-semibold">{score}</span>
         <StatusBadge score={score} size="sm" />
       </div>
     </div>

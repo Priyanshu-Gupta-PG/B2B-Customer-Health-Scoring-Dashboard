@@ -18,10 +18,10 @@ function ImpactBadge({ direction }: { direction: ImpactDirection }) {
     <span
       title={copy.hint}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium border backdrop-blur-sm",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium backdrop-blur-sm",
         direction === "positive"
-          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-          : "border-rose-500/20 bg-rose-500/10 text-rose-300",
+          ? "border-success/25 bg-success-subtle text-success"
+          : "border-danger/25 bg-danger-subtle text-danger",
       )}
     >
       <Icon className="size-3" aria-hidden />
@@ -61,7 +61,7 @@ export function ActiveRulesTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[40rem] text-left text-sm">
-        <thead className="border-b border-white/[0.06] bg-white/[0.02] text-text-muted text-[11px] tracking-wider uppercase">
+        <thead className="border-border bg-surface-raised text-text-muted border-b text-[11px] tracking-wider uppercase">
           <tr>
             <th className="px-5 py-3.5 font-medium">Telemetry Signal</th>
             <th className="px-5 py-3.5 font-medium">Engine Weight</th>
@@ -70,22 +70,24 @@ export function ActiveRulesTable({
             <th className="px-5 py-3.5 font-medium">Last Modified</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/[0.04]">
+        <tbody className="divide-border-subtle divide-y">
           {active.map((rule) => (
-            <tr key={rule.id} className="transition-colors hover:bg-white/[0.02]">
+            <tr key={rule.id} className="hover:bg-surface-raised transition-colors">
               <td className="px-5 py-4">
                 <p className="text-text font-semibold">{metricLabel(rule.metric_name)}</p>
                 <p className="text-text-muted mt-0.5 font-mono text-[11px]">{rule.metric_name}</p>
               </td>
               <td className="px-5 py-4">
                 <div className="flex items-center gap-3">
-                  <span className="num text-text font-semibold w-10 text-right">{rule.weight_percentage}%</span>
+                  <span className="num text-text w-10 text-right font-semibold">
+                    {rule.weight_percentage}%
+                  </span>
                   <div
-                    className="h-2 w-32 overflow-hidden rounded-full bg-white/[0.06]"
+                    className="bg-surface-raised h-2 w-32 overflow-hidden rounded-full"
                     aria-hidden
                   >
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
+                      className="bg-primary h-full rounded-sm transition-all duration-500"
                       style={{ width: `${rule.weight_percentage}%` }}
                     />
                   </div>
@@ -98,16 +100,21 @@ export function ActiveRulesTable({
                 {rule.threshold == null ? (
                   <span className="text-text-subtle">Normalized</span>
                 ) : (
-                  <span className="font-semibold text-text">{rule.threshold}</span>
+                  <span className="text-text font-semibold">{rule.threshold}</span>
                 )}
               </td>
-              <td className="text-text-muted px-5 py-4 text-xs">{formatDateTime(rule.updated_at)}</td>
+              <td className="text-text-muted px-5 py-4 text-xs">
+                {formatDateTime(rule.updated_at)}
+              </td>
             </tr>
           ))}
         </tbody>
         <tfoot>
-          <tr className="border-t border-white/[0.08] bg-white/[0.02]">
-            <td className="text-text-muted px-5 py-3.5 text-xs font-semibold uppercase tracking-wider" colSpan={1}>
+          <tr className="border-border bg-surface-raised border-t">
+            <td
+              className="text-text-muted px-5 py-3.5 text-xs font-semibold tracking-wider uppercase"
+              colSpan={1}
+            >
               Composite Allocation Total
             </td>
             <td className="px-5 py-3.5" colSpan={4}>
@@ -115,16 +122,18 @@ export function ActiveRulesTable({
                 className={cn(
                   "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold",
                   totalInvalid
-                    ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
-                    : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+                    ? "border-danger/30 bg-danger-subtle text-danger"
+                    : "border-success/30 bg-success-subtle text-success",
                 )}
               >
-                {!totalInvalid && <CheckCircle2 className="size-3.5 text-emerald-400" />}
+                {!totalInvalid && <CheckCircle2 className="text-success size-3.5" />}
                 <span className="num font-bold">{total}%</span>
                 {totalInvalid ? (
-                  <span className="font-normal text-rose-300">{TOTAL_WEIGHT_ERROR}</span>
+                  <span className="text-danger font-normal">{TOTAL_WEIGHT_ERROR}</span>
                 ) : (
-                  <span className="font-normal text-emerald-300/80">Valid: Ready for automated recalculation</span>
+                  <span className="text-success/80 font-normal">
+                    Valid: Ready for automated recalculation
+                  </span>
                 )}
               </span>
             </td>

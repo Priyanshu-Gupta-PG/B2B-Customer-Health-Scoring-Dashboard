@@ -32,7 +32,8 @@ export const toast = {
     useToastStore.getState().push({ title, description, tone: "success" }),
   error: (title: string, description?: string) =>
     useToastStore.getState().push({ title, description, tone: "error" }),
-  info: (title: string, description?: string) => useToastStore.getState().push({ title, description, tone: "info" }),
+  info: (title: string, description?: string) =>
+    useToastStore.getState().push({ title, description, tone: "info" }),
   warning: (title: string, description?: string) =>
     useToastStore.getState().push({ title, description, tone: "warning" }),
 };

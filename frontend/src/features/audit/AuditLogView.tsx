@@ -84,9 +84,9 @@ export function AuditLogView() {
         description="Immutable governance log recording algorithm calibration, manual ingestion, and recalculation triggers."
       />
 
-      <Card className="animate-fade-in-up">
+      <Card className="">
         {/* Filter controls */}
-        <div className="border-b border-white/[0.06] bg-white/[0.01] grid grid-cols-1 gap-3 px-5 py-4 sm:grid-cols-2 lg:flex lg:flex-row lg:items-end">
+        <div className="border-border bg-surface-raised grid grid-cols-1 gap-3 border-b px-5 py-4 sm:grid-cols-2 lg:flex lg:flex-row lg:items-end">
           <div className="w-full lg:w-44">
             <Input
               id="audit-from"
@@ -170,7 +170,7 @@ export function AuditLogView() {
             <>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[42rem] text-left text-sm" aria-label="Audit log">
-                  <thead className="border-b border-white/[0.06] bg-white/[0.02] text-text-muted text-[11px] tracking-wider uppercase">
+                  <thead className="border-border bg-surface-raised text-text-muted border-b text-[11px] tracking-wider uppercase">
                     <tr>
                       <th scope="col" className="px-5 py-3.5 font-medium">
                         Timestamp
@@ -189,19 +189,19 @@ export function AuditLogView() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/[0.04]">
+                  <tbody className="divide-border-subtle divide-y">
                     {rows.map((entry) => {
                       const before = weightFrom(entry.before_state);
                       const after = weightFrom(entry.after_state);
                       const hasDelta = before != null && after != null;
 
                       return (
-                        <tr key={entry.id} className="transition-colors hover:bg-white/[0.02]">
+                        <tr key={entry.id} className="hover:bg-surface-raised transition-colors">
                           <td className="num text-text-muted px-5 py-3.5 text-xs whitespace-nowrap">
                             {formatDateTime(entry.created_at)}
                           </td>
                           <td className="px-5 py-3.5">
-                            <span className="inline-flex items-center gap-1.5 font-mono text-xs text-text">
+                            <span className="text-text inline-flex items-center gap-1.5 font-mono text-xs">
                               <span className="size-1.5 rounded-full bg-blue-400" />
                               {entry.actor.email}
                             </span>
@@ -213,9 +213,9 @@ export function AuditLogView() {
                             {formatWeight(before)}
                           </td>
                           <td className="num text-text px-5 py-3.5 text-right whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1.5 justify-end">
-                              {hasDelta && <ArrowRight className="size-3 text-text-muted" />}
-                              <span className={hasDelta ? "text-blue-300 font-semibold" : ""}>
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              {hasDelta && <ArrowRight className="text-text-muted size-3" />}
+                              <span className={hasDelta ? "text-primary font-semibold" : ""}>
                                 {formatWeight(after)}
                               </span>
                             </div>

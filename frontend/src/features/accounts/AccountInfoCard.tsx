@@ -1,7 +1,7 @@
 import { DollarSign, Globe, Shield, User } from "lucide-react";
 import type { AccountDetail } from "@/types/api";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
-import { scoreTextClass } from "@/lib/status";
+import { STATUS_COLOR, getStatusTier, scoreTextClass } from "@/lib/status";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
@@ -10,27 +10,24 @@ export function AccountInfoCard({ account }: { account: AccountDetail }) {
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
-
-  const strokeColor =
-    score <= 30 ? "#f43f5e" : score <= 70 ? "#f59e0b" : "#10b981";
+  const strokeColor = STATUS_COLOR[getStatusTier(score)];
 
   return (
-    <Card className="flex flex-col h-full animate-fade-in-up">
+    <Card className="flex h-full flex-col">
       <CardHeader
-        title="Account Profile"
-        description="Health diagnostics & contractual tier"
+        title="Account profile"
+        description="Contract and health snapshot"
         action={<StatusBadge status={account.health_status} />}
       />
-      <CardBody className="space-y-6 flex-1 flex flex-col justify-between">
-        {/* Radial Circular Health Gauge */}
-        <div className="flex items-center gap-5 rounded-xl border border-white/[0.06] bg-surface-raised/40 p-4">
+      <CardBody className="flex flex-1 flex-col justify-between space-y-5">
+        <div className="border-border bg-surface-raised flex items-center gap-4 rounded-md border p-4">
           <div className="relative size-24 shrink-0">
             <svg className="size-full -rotate-90" viewBox="0 0 100 100">
               <circle
                 cx="50"
                 cy="50"
                 r={radius}
-                className="stroke-white/[0.06]"
+                className="stroke-border"
                 strokeWidth="8"
                 fill="transparent"
               />
@@ -48,19 +45,17 @@ export function AccountInfoCard({ account }: { account: AccountDetail }) {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`num text-2xl font-bold ${scoreTextClass(score)}`}>
-                {score}
-              </span>
-              <span className="text-[9px] uppercase tracking-wider text-text-muted">Score</span>
+              <span className={`num text-2xl font-bold ${scoreTextClass(score)}`}>{score}</span>
+              <span className="text-text-muted text-[9px] tracking-wider uppercase">Score</span>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-text">Deterministic Health</p>
-            <p className="text-[11px] text-text-muted mt-0.5">
+            <p className="text-text text-xs font-semibold">Deterministic Health</p>
+            <p className="text-text-muted mt-0.5 text-[11px]">
               Derived from 3 ingested telemetries (Usage, Support, Billing).
             </p>
-            <div className="mt-2 text-xs font-medium text-text">
+            <div className="text-text mt-2 text-xs font-medium">
               Status: <span className={scoreTextClass(score)}>{account.health_status}</span>
             </div>
           </div>
@@ -68,43 +63,45 @@ export function AccountInfoCard({ account }: { account: AccountDetail }) {
 
         {/* Detailed Metadata Fields */}
         <div className="grid grid-cols-2 gap-3.5 text-xs">
-          <div className="rounded-lg border border-white/[0.04] bg-white/[0.02] p-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-              <DollarSign className="size-3 text-emerald-400" />
+          <div className="border-border-subtle bg-surface-raised rounded-lg border p-2.5">
+            <p className="text-text-muted flex items-center gap-1.5 text-[10px] font-semibold tracking-wider uppercase">
+              <DollarSign className="text-success size-3" />
               Annual Contract
             </p>
-            <p className="num text-sm font-semibold text-text mt-1">
+            <p className="num text-text mt-1 text-sm font-semibold">
               {formatCurrency(account.arr)}
             </p>
           </div>
 
-          <div className="rounded-lg border border-white/[0.04] bg-white/[0.02] p-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-              <Shield className="size-3 text-blue-400" />
+          <div className="border-border-subtle bg-surface-raised rounded-lg border p-2.5">
+            <p className="text-text-muted flex items-center gap-1.5 text-[10px] font-semibold tracking-wider uppercase">
+              <Shield className="text-primary size-3" />
               Tier Plan
             </p>
-            <p className="text-sm font-semibold text-text mt-1">{account.plan}</p>
+            <p className="text-text mt-1 text-sm font-semibold">{account.plan}</p>
           </div>
 
-          <div className="rounded-lg border border-white/[0.04] bg-white/[0.02] p-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-              <Globe className="size-3 text-text-muted" />
+          <div className="border-border-subtle bg-surface-raised rounded-lg border p-2.5">
+            <p className="text-text-muted flex items-center gap-1.5 text-[10px] font-semibold tracking-wider uppercase">
+              <Globe className="text-text-muted size-3" />
               Domain
             </p>
-            <p className="text-xs font-medium text-text mt-1 truncate font-mono">{account.domain}</p>
+            <p className="text-text mt-1 truncate font-mono text-xs font-medium">
+              {account.domain}
+            </p>
           </div>
 
-          <div className="rounded-lg border border-white/[0.04] bg-white/[0.02] p-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-              <User className="size-3 text-text-muted" />
+          <div className="border-border-subtle bg-surface-raised rounded-lg border p-2.5">
+            <p className="text-text-muted flex items-center gap-1.5 text-[10px] font-semibold tracking-wider uppercase">
+              <User className="text-text-muted size-3" />
               Owner CSM
             </p>
-            <p className="text-xs font-medium text-text mt-1 truncate">{account.owner_csm}</p>
+            <p className="text-text mt-1 truncate text-xs font-medium">{account.owner_csm}</p>
           </div>
         </div>
 
         {/* Timestamps */}
-        <div className="border-t border-white/[0.06] pt-3 text-[11px] text-text-muted space-y-1">
+        <div className="border-border text-text-muted space-y-1 border-t pt-3 text-[11px]">
           <div className="flex justify-between">
             <span>Customer since</span>
             <span className="text-text">{formatDate(account.created_at)}</span>

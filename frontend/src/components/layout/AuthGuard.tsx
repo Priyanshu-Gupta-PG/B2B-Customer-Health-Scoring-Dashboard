@@ -24,7 +24,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <Logo />
-        <p className="text-xs text-text-muted">Checking your session…</p>
+        <p className="text-text-muted text-xs">Checking your session…</p>
       </div>
     );
   }

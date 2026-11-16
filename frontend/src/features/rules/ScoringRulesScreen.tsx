@@ -30,7 +30,7 @@ export function ScoringRulesScreen() {
         actions={
           isAdmin ? (
             <Button
-              className="w-full sm:w-auto gap-2"
+              className="w-full gap-2 sm:w-auto"
               onClick={() => setEditOpen(true)}
               disabled={isLoading || rules.length === 0}
             >
@@ -42,28 +42,31 @@ export function ScoringRulesScreen() {
       />
 
       {/* Formula Explainer Card */}
-      <div className="rounded-xl border border-white/[0.08] bg-surface-raised/40 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in-up">
+      <div className="border-border bg-surface-raised/40 flex flex-col justify-between gap-4 rounded-xl border p-4 sm:p-5 md:flex-row md:items-center">
         <div className="flex items-start gap-3.5">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+          <div className="bg-primary-subtle border-primary/25 text-primary flex size-9 shrink-0 items-center justify-center rounded-xl border">
             <Calculator className="size-4" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-text">Deterministic Scoring Engine (SC-01)</p>
-            <p className="text-xs text-text-muted mt-0.5">
-              Each raw telemetry signal is normalized [0, 1] against benchmark denominators, multiplied by configured weight percentage, and summed.
+            <p className="text-text text-xs font-semibold">Deterministic Scoring Engine (SC-01)</p>
+            <p className="text-text-muted mt-0.5 text-xs">
+              Each raw telemetry signal is normalized [0, 1] against benchmark denominators,
+              multiplied by configured weight percentage, and summed.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-start md:self-auto rounded-lg border border-white/[0.08] bg-black/30 px-3 py-2 text-xs font-mono text-text-muted">
-          <span className="text-blue-300">Score</span> = <span className="text-text">Σ(Normalized × Weight)</span>
+        <div className="border-border text-text-muted flex items-center gap-2 self-start rounded-lg border bg-black/30 px-3 py-2 font-mono text-xs md:self-auto">
+          <span className="text-primary">Score</span> ={" "}
+          <span className="text-text">Σ(Normalized × Weight)</span>
         </div>
       </div>
 
       {!isAdmin && (
-        <p className="text-text-muted text-xs flex items-center gap-1.5 pl-1">
-          <Info className="size-3.5 text-text-subtle" />
-          You have read-only access. Administrator privileges are required to calibrate metric weights.
+        <p className="text-text-muted flex items-center gap-1.5 pl-1 text-xs">
+          <Info className="text-text-subtle size-3.5" />
+          You have read-only access. Administrator privileges are required to calibrate metric
+          weights.
         </p>
       )}
 
@@ -77,7 +80,7 @@ export function ScoringRulesScreen() {
           />
         </Card>
       ) : (
-        <Card className="overflow-hidden animate-fade-in-up stagger-1">
+        <Card className="overflow-hidden">
           <CardHeader
             title="Configured Telemetry Signals"
             description={

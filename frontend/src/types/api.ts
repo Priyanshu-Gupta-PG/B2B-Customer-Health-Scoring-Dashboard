@@ -145,7 +145,8 @@ export interface BulkUpdateRulesResponse {
 
 // ---------- Audit log ----------
 
-export type AuditAction = "RULE_UPDATED" | "RULES_BULK_UPDATED" | "RECALCULATION_RUN" | "INGESTION_TRIGGERED";
+export type AuditAction =
+  "RULE_UPDATED" | "RULES_BULK_UPDATED" | "RECALCULATION_RUN" | "INGESTION_TRIGGERED";
 
 export interface AuditLogEntry {
   id: string;

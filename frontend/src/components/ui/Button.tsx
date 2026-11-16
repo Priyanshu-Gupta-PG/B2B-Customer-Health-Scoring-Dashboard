@@ -13,19 +13,19 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClass: Record<Variant, string> = {
   primary:
-    "bg-primary text-white shadow-[0_1px_2px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.2)] hover:bg-primary-hover focus-visible:ring-primary/40 active:translate-y-[1px] disabled:bg-primary/40 disabled:shadow-none",
+    "bg-primary text-[color:var(--on-primary)] hover:bg-primary-hover focus-visible:ring-primary/35 disabled:bg-primary/45",
   secondary:
-    "border border-border bg-surface-raised/70 text-text shadow-[0_1px_2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] hover:bg-surface-elevated hover:border-border-focus focus-visible:ring-primary/30 active:translate-y-[1px] disabled:opacity-40",
+    "border border-border bg-surface text-text hover:bg-surface-elevated focus-visible:ring-primary/25 disabled:opacity-45",
   ghost:
-    "text-text-muted hover:bg-surface-raised hover:text-text focus-visible:ring-primary/30 active:translate-y-[1px] disabled:opacity-40",
+    "text-text-muted hover:bg-surface-elevated hover:text-text focus-visible:ring-primary/25 disabled:opacity-45",
   danger:
-    "bg-danger text-white shadow-[0_1px_2px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.2)] hover:bg-rose-600 focus-visible:ring-danger/40 active:translate-y-[1px] disabled:bg-danger/40",
+    "bg-danger text-[color:var(--on-danger)] hover:opacity-90 focus-visible:ring-danger/35 disabled:bg-danger/45",
 };
 
 const sizeClass: Record<Size, string> = {
-  sm: "h-8 px-3 text-xs gap-1.5 rounded-lg",
-  md: "h-9 px-3.5 text-xs font-medium gap-2 rounded-lg",
-  lg: "h-10 px-4 text-sm font-medium gap-2 rounded-xl",
+  sm: "h-8 px-3 text-xs gap-1.5 rounded-md",
+  md: "h-9 px-3.5 text-xs font-medium gap-2 rounded-md",
+  lg: "h-10 px-4 text-sm font-medium gap-2 rounded-md",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -37,7 +37,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        "inline-flex cursor-pointer items-center justify-center font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed select-none",
+        "inline-flex cursor-pointer items-center justify-center font-medium transition-colors duration-100 select-none focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed",
         variantClass[variant],
         sizeClass[size],
         className,

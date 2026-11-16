@@ -5,46 +5,54 @@ import { cn } from "@/lib/cn";
 import { formatRelative } from "@/lib/format";
 
 /** Live badge showing whether background ingestion is running. */
-export function CronStatusIndicator({ className, detailed = false }: { className?: string; detailed?: boolean }) {
+export function CronStatusIndicator({
+  className,
+  detailed = false,
+}: {
+  className?: string;
+  detailed?: boolean;
+}) {
   const { data, isError } = useHealth();
 
   const state = isError ? "offline" : (data?.cron_worker ?? "idle");
   const config = {
     running: {
-      dot: "bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse",
-      text: "Ingestion active",
-      pill: "border-blue-500/20 bg-blue-500/10 text-blue-300",
+      dot: "bg-primary",
+      text: "Sync running",
+      pill: "border-primary/25 bg-primary-subtle text-primary",
     },
     idle: {
-      dot: "bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.5)]",
-      text: "Pipeline idle",
-      pill: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+      dot: "bg-success",
+      text: "Sync idle",
+      pill: "border-success/25 bg-success-subtle text-success",
     },
     stalled: {
-      dot: "bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.5)]",
-      text: "Worker stalled",
-      pill: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+      dot: "bg-warning",
+      text: "Sync stalled",
+      pill: "border-warning/25 bg-warning-subtle text-warning",
     },
     offline: {
-      dot: "bg-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.5)]",
+      dot: "bg-danger",
       text: "API offline",
-      pill: "border-rose-500/20 bg-rose-500/10 text-rose-300",
+      pill: "border-danger/25 bg-danger-subtle text-danger",
     },
   }[state];
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-medium backdrop-blur-sm transition-all",
+        "inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-[11px] font-medium",
         config.pill,
         className,
       )}
-      title={data?.last_ingestion_at ? `Last sync ${formatRelative(data.last_ingestion_at)}` : undefined}
+      title={
+        data?.last_ingestion_at ? `Last sync ${formatRelative(data.last_ingestion_at)}` : undefined
+      }
     >
-      <span className={cn("size-1.5 rounded-full", config.dot)} aria-hidden />
+      <span className={cn("size-1.5 rounded-sm", config.dot)} aria-hidden />
       <span>{config.text}</span>
       {detailed && data?.last_ingestion_at && (
-        <span className="opacity-75">· {formatRelative(data.last_ingestion_at)}</span>
+        <span className="opacity-80">· {formatRelative(data.last_ingestion_at)}</span>
       )}
     </span>
   );

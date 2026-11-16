@@ -114,23 +114,18 @@ export function EditScoringAlgorithmModal({
         {serverError && <AlertBanner>{serverError}</AlertBanner>}
 
         {/* Live Visual Allocation Bar */}
-        <div className="rounded-xl border border-white/[0.08] bg-surface-raised/40 p-4 space-y-2">
+        <div className="border-border bg-surface-raised/40 space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-text">Weight Allocation Gauge</span>
-            <span className={cn("num font-bold", totalInvalid ? "text-rose-400" : "text-emerald-400")}>
+            <span className="text-text font-semibold">Weight Allocation Gauge</span>
+            <span className={cn("num font-bold", totalInvalid ? "text-danger" : "text-success")}>
               {total}% / 100%
             </span>
           </div>
-          <div className="h-3 w-full overflow-hidden rounded-full bg-white/[0.06] flex">
+          <div className="bg-surface-raised flex h-3 w-full overflow-hidden rounded-full">
             {rules.map((rule, index) => {
               const row = watched[index];
               const weight = row?.is_active ? Number(row.weight_percentage) || 0 : 0;
-              const colors = [
-                "bg-blue-500",
-                "bg-amber-400",
-                "bg-emerald-500",
-                "bg-purple-500",
-              ];
+              const colors = ["bg-blue-500", "bg-warning", "bg-success", "bg-purple-500"];
               return (
                 <div
                   key={rule.id}
@@ -147,40 +142,44 @@ export function EditScoringAlgorithmModal({
         <div
           className={cn(
             "overflow-hidden rounded-xl border transition-colors",
-            totalInvalid ? "border-rose-500/30" : "border-white/[0.08]",
+            totalInvalid ? "border-danger/30" : "border-border",
           )}
         >
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-border-subtle divide-y">
             {rules.map((rule, index) => {
               const row = watched[index];
               const inactive = row ? !row.is_active : !rule.is_active;
-              const currentWeight = row ? Number(row.weight_percentage) || 0 : rule.weight_percentage;
+              const currentWeight = row
+                ? Number(row.weight_percentage) || 0
+                : rule.weight_percentage;
 
               return (
                 <li
                   key={rule.id}
                   className={cn(
                     "flex flex-col gap-3 p-4 transition-all duration-200",
-                    inactive ? "opacity-40 bg-black/20" : "bg-white/[0.01]",
+                    inactive ? "bg-black/20 opacity-40" : "bg-surface-raised",
                   )}
                 >
                   <input type="hidden" {...register(`rules.${index}.id`)} />
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-text text-sm font-semibold">{metricLabel(rule.metric_name)}</p>
-                      <p className="text-text-muted text-[11px] mt-0.5">
+                      <p className="text-text text-sm font-semibold">
+                        {metricLabel(rule.metric_name)}
+                      </p>
+                      <p className="text-text-muted mt-0.5 text-[11px]">
                         {rule.impact_direction === "positive"
                           ? "Positive: Higher values increase score"
                           : "Negative: Higher values decrease score"}
                       </p>
                     </div>
 
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
-                      <span className="text-xs text-text-muted">Enabled</span>
+                    <label className="flex cursor-pointer items-center gap-2 select-none">
+                      <span className="text-text-muted text-xs">Enabled</span>
                       <input
                         type="checkbox"
-                        className="accent-blue-500 size-4 rounded cursor-pointer"
+                        className="size-4 cursor-pointer rounded accent-blue-500"
                         {...register(`rules.${index}.is_active`)}
                       />
                     </label>
@@ -200,7 +199,7 @@ export function EditScoringAlgorithmModal({
                           shouldValidate: true,
                         });
                       }}
-                      className="flex-1 accent-blue-500 cursor-pointer disabled:cursor-not-allowed"
+                      className="flex-1 cursor-pointer accent-blue-500 disabled:cursor-not-allowed"
                     />
                     <div className="w-20">
                       <Input
@@ -212,11 +211,14 @@ export function EditScoringAlgorithmModal({
                         disabled={inactive}
                         aria-label={`${metricLabel(rule.metric_name)} weight`}
                         error={errors.rules?.[index]?.weight_percentage?.message}
-                        className={cn("num text-right font-semibold", totalInvalid && "border-rose-500/40")}
+                        className={cn(
+                          "num text-right font-semibold",
+                          totalInvalid && "border-danger/40",
+                        )}
                         {...register(`rules.${index}.weight_percentage`, { valueAsNumber: true })}
                       />
                     </div>
-                    <span className="text-xs font-medium text-text-muted">%</span>
+                    <span className="text-text-muted text-xs font-medium">%</span>
                   </div>
                 </li>
               );
@@ -231,16 +233,16 @@ export function EditScoringAlgorithmModal({
           className={cn(
             "rounded-xl border p-4 transition-colors",
             totalInvalid
-              ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
-              : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+              ? "border-danger/30 bg-danger-subtle text-danger"
+              : "border-success/30 bg-success-subtle text-success",
           )}
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {totalInvalid ? (
-                <AlertCircle className="size-4 text-rose-400 shrink-0" />
+                <AlertCircle className="text-danger size-4 shrink-0" />
               ) : (
-                <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="text-success size-4 shrink-0" />
               )}
               <p className="text-xs font-semibold">
                 {totalInvalid ? "Invalid Total Weight" : "Formula Constraint Satisfied"}
@@ -249,9 +251,7 @@ export function EditScoringAlgorithmModal({
             <p className="num text-sm font-bold">{total}%</p>
           </div>
           {totalInvalid && (
-            <p className="mt-1 text-xs text-rose-300/90 pl-6">
-              {totalError ?? TOTAL_WEIGHT_ERROR}
-            </p>
+            <p className="text-danger/90 mt-1 pl-6 text-xs">{totalError ?? TOTAL_WEIGHT_ERROR}</p>
           )}
         </div>
       </form>

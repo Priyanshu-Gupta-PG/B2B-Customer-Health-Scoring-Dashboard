@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, Sparkles, User } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AlertBanner } from "@/components/ui/ErrorState";
@@ -21,7 +21,8 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 function safeNext(next: string | null) {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/login")) return "/dashboard";
+  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/login"))
+    return "/dashboard";
   return next;
 }
 
@@ -55,11 +56,8 @@ export function LoginForm() {
   });
 
   return (
-    <div className="card-premium relative rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl border border-white/10 animate-fade-in-up">
-      {/* Subtle ambient orb */}
-      <div className="ambient-glow-indigo pointer-events-none absolute -top-12 -right-12 size-40 rounded-full blur-3xl opacity-50" />
-
-      <form onSubmit={onSubmit} noValidate className="relative z-10 flex flex-col gap-4">
+    <div className="panel p-5 sm:p-6">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         {expired && !serverError && (
           <AlertBanner tone="warning">Your session expired. Please sign in again.</AlertBanner>
         )}
@@ -85,7 +83,7 @@ export function LoginForm() {
               type="button"
               onClick={() => setShowPassword((s) => !s)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="pointer-events-auto text-text-muted hover:text-text cursor-pointer transition-colors"
+              className="text-text-muted hover:text-text pointer-events-auto cursor-pointer transition-colors"
             >
               {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
@@ -95,51 +93,57 @@ export function LoginForm() {
         />
 
         {serverError && (
-          <p className="text-xs font-medium text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5" role="alert">
+          <p
+            className="border-danger/25 bg-danger-subtle text-danger rounded-md border p-2.5 text-xs font-medium"
+            role="alert"
+          >
             {serverError}
           </p>
         )}
 
-        <Button type="submit" size="lg" loading={isSubmitting} className="mt-2 w-full gap-2">
+        <Button type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full gap-2">
           <span>{isSubmitting ? "Signing in…" : "Sign in"}</span>
           <ArrowRight className="size-4" />
         </Button>
 
         {env.useMocks && (
-          <div className="mt-4 rounded-xl border border-white/[0.08] bg-surface-raised/40 p-3.5 text-xs text-text-muted space-y-2">
-            <div className="flex items-center gap-1.5 text-text font-medium text-[11px] uppercase tracking-wider">
-              <Sparkles className="size-3.5 text-blue-400" />
-              <span>Demo accounts</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <div className="border-border bg-surface-raised text-text-muted mt-2 space-y-2 rounded-md border p-3 text-xs">
+            <p className="text-text text-[11px] font-semibold tracking-wide uppercase">
+              Demo accounts
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <button
                 type="button"
-                className="flex flex-col text-left rounded-lg border border-white/[0.06] bg-white/[0.02] p-2 hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer"
+                className="border-border bg-surface hover:bg-surface-elevated flex cursor-pointer flex-col rounded-md border p-2 text-left transition-colors"
                 onClick={() => {
                   setValue("email", "admin@company.com", { shouldValidate: true });
                   setValue("password", "Admin123!", { shouldValidate: true });
                 }}
               >
-                <span className="flex items-center gap-1.5 font-semibold text-text text-xs">
-                  <ShieldCheck className="size-3.5 text-emerald-400" />
+                <span className="text-text flex items-center gap-1.5 text-xs font-semibold">
+                  <ShieldCheck className="text-success size-3.5" />
                   Admin
                 </span>
-                <span className="text-[10px] text-text-muted font-mono mt-0.5">admin@company.com</span>
+                <span className="text-text-muted mt-0.5 font-mono text-[10px]">
+                  admin@company.com
+                </span>
               </button>
 
               <button
                 type="button"
-                className="flex flex-col text-left rounded-lg border border-white/[0.06] bg-white/[0.02] p-2 hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer"
+                className="border-border bg-surface hover:bg-surface-elevated flex cursor-pointer flex-col rounded-md border p-2 text-left transition-colors"
                 onClick={() => {
                   setValue("email", "csm@company.com", { shouldValidate: true });
                   setValue("password", "Csm12345!", { shouldValidate: true });
                 }}
               >
-                <span className="flex items-center gap-1.5 font-semibold text-text text-xs">
-                  <User className="size-3.5 text-blue-400" />
-                  CSM (Read-only)
+                <span className="text-text flex items-center gap-1.5 text-xs font-semibold">
+                  <User className="text-primary size-3.5" />
+                  CSM (read-only)
                 </span>
-                <span className="text-[10px] text-text-muted font-mono mt-0.5">csm@company.com</span>
+                <span className="text-text-muted mt-0.5 font-mono text-[10px]">
+                  csm@company.com
+                </span>
               </button>
             </div>
           </div>
