@@ -27,14 +27,9 @@ Copy `.env.example` to `.env.local`. All variables are public (`NEXT_PUBLIC_*`) 
 | `NEXT_PUBLIC_API_URL` | `http://localhost:4000/api/v1` | Express API base. `GET /health` is called on the origin of this URL. |
 | `NEXT_PUBLIC_USE_MOCKS` | `true` in `.env.example` | `true` starts the MSW worker and intercepts `/api/v1` + `/health`. Set `false` once Express is running. |
 
-### Demo credentials (MSW only)
+### Sample access (MSW only)
 
-From `src/mocks/db.ts`, shown on the login form when mocks are on:
-
-| Role | Email | Password |
-| --- | --- | --- |
-| Administrator | `admin@company.com` | `Admin123!` |
-| CSM (read-only) | `csm@company.com` | `Csm12345!` |
+When mocks are on, the login screen offers one-click **Continue as Admin** / **Continue as CSM** sample sessions. Demo passwords are not embedded in the client bundle; mock auth issues opaque session tokens stored server-side in the mock DB.
 
 Admin can edit scoring weights and trigger ingestion. CSM can view every screen but cannot save rules or run ingest.
 

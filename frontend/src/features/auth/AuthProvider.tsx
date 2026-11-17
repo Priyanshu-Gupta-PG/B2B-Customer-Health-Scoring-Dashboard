@@ -18,7 +18,7 @@ import {
   readSession,
   writeSession,
 } from "@/lib/auth";
-import { login as loginRequest } from "./api";
+import { login as loginRequest, loginDemo as loginDemoRequest } from "./api";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -27,6 +27,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (body: LoginRequest) => Promise<AuthUser>;
+  loginDemo: (role: AuthUser["role"]) => Promise<AuthUser>;
   logout: () => void;
 }
 
@@ -53,9 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(
-    async (body: LoginRequest) => {
-      const res = await loginRequest(body);
+  const applySession = useCallback(
+    (res: { token: string; user: AuthUser; expires_at: string }) => {
       writeSession({ token: res.token, user: res.user, expiresAt: res.expires_at });
       notifyAuthChange();
       setUser(res.user);
@@ -63,6 +63,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.user;
     },
     [queryClient],
+  );
+
+  const login = useCallback(
+    async (body: LoginRequest) => applySession(await loginRequest(body)),
+    [applySession],
+  );
+
+  const loginDemo = useCallback(
+    async (role: AuthUser["role"]) => applySession(await loginDemoRequest(role)),
+    [applySession],
   );
 
   const logout = useCallback(() => {
@@ -79,9 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!user,
       isAdmin: user?.role === "admin",
       login,
+      loginDemo,
       logout,
     }),
-    [user, isLoading, login, logout],
+    [user, isLoading, login, loginDemo, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

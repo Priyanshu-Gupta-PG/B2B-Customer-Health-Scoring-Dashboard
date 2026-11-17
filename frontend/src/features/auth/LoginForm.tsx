@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { AlertBanner } from "@/components/ui/ErrorState";
 import { env } from "@/lib/env";
 import { toApiError } from "@/lib/errors";
+import type { AuthUser } from "@/types/api";
 import { useAuth } from "./AuthProvider";
 
 const schema = z.object({
@@ -27,33 +28,49 @@ function safeNext(next: string | null) {
 }
 
 export function LoginForm() {
-  const { login } = useAuth();
+  const { login, loginDemo } = useAuth();
   const router = useRouter();
   const search = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<AuthUser["role"] | null>(null);
   const expired = search.get("reason") === "expired";
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
   });
 
+  const finish = () => router.replace(safeNext(search.get("next")));
+
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     try {
       await login(values);
-      router.replace(safeNext(search.get("next")));
+      finish();
     } catch (err) {
       const e = toApiError(err);
       setServerError(e.status === 401 ? "Invalid credentials" : e.message);
     }
   });
+
+  const onDemo = async (role: AuthUser["role"]) => {
+    setServerError(null);
+    setDemoLoading(role);
+    try {
+      await loginDemo(role);
+      finish();
+    } catch (err) {
+      const e = toApiError(err);
+      setServerError(e.message);
+    } finally {
+      setDemoLoading(null);
+    }
+  };
 
   return (
     <div className="panel p-5 sm:p-6">
@@ -109,41 +126,36 @@ export function LoginForm() {
         {env.useMocks && (
           <div className="border-border bg-surface-raised text-text-muted mt-2 space-y-2 rounded-md border p-3 text-xs">
             <p className="text-text text-[11px] font-semibold tracking-wide uppercase">
-              Demo accounts
+              Sample access
+            </p>
+            <p className="text-text-muted text-[11px] leading-relaxed">
+              Use a one-click sample session. No demo passwords are embedded in the client.
             </p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <button
                 type="button"
-                className="border-border bg-surface hover:bg-surface-elevated flex cursor-pointer flex-col rounded-md border p-2 text-left transition-colors"
-                onClick={() => {
-                  setValue("email", "admin@company.com", { shouldValidate: true });
-                  setValue("password", "Admin123!", { shouldValidate: true });
-                }}
+                disabled={demoLoading !== null || isSubmitting}
+                className="border-border bg-surface hover:bg-surface-elevated flex cursor-pointer flex-col rounded-md border p-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={() => void onDemo("admin")}
               >
                 <span className="text-text flex items-center gap-1.5 text-xs font-semibold">
                   <ShieldCheck className="text-success size-3.5" />
-                  Admin
+                  {demoLoading === "admin" ? "Signing in…" : "Continue as Admin"}
                 </span>
-                <span className="text-text-muted mt-0.5 font-mono text-[10px]">
-                  admin@company.com
-                </span>
+                <span className="text-text-muted mt-0.5 text-[10px]">Full access · sample data</span>
               </button>
 
               <button
                 type="button"
-                className="border-border bg-surface hover:bg-surface-elevated flex cursor-pointer flex-col rounded-md border p-2 text-left transition-colors"
-                onClick={() => {
-                  setValue("email", "csm@company.com", { shouldValidate: true });
-                  setValue("password", "Csm12345!", { shouldValidate: true });
-                }}
+                disabled={demoLoading !== null || isSubmitting}
+                className="border-border bg-surface hover:bg-surface-elevated flex cursor-pointer flex-col rounded-md border p-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={() => void onDemo("csm")}
               >
                 <span className="text-text flex items-center gap-1.5 text-xs font-semibold">
                   <User className="text-primary size-3.5" />
-                  CSM (read-only)
+                  {demoLoading === "csm" ? "Signing in…" : "Continue as CSM"}
                 </span>
-                <span className="text-text-muted mt-0.5 font-mono text-[10px]">
-                  csm@company.com
-                </span>
+                <span className="text-text-muted mt-0.5 text-[10px]">Read-only · sample data</span>
               </button>
             </div>
           </div>

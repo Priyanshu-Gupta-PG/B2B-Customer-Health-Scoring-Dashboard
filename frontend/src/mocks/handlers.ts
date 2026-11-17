@@ -71,7 +71,7 @@ export const handlers = [
         "/api/v1/auth/login",
       );
     }
-    const session = mockDb().login(body.email, body.password);
+    const session = await mockDb().login(body.email, body.password);
     if (!session) {
       return problem(
         401,
@@ -79,6 +79,20 @@ export const handlers = [
         "Email or password is incorrect.",
         "/api/v1/auth/login",
       );
+    }
+    return HttpResponse.json(session);
+  }),
+
+  /** Mock-only sample login — issues an opaque session without shipping passwords in the UI. */
+  http.post(`${API}/auth/demo`, async ({ request }) => {
+    await jitter();
+    const body = (await request.json().catch(() => null)) as { role?: string } | null;
+    if (body?.role !== "admin" && body?.role !== "csm") {
+      return problem(422, "Validation Error", "role must be admin or csm.", "/api/v1/auth/demo");
+    }
+    const session = mockDb().loginAsDemo(body.role);
+    if (!session) {
+      return problem(401, "Invalid credentials", "Demo user is unavailable.", "/api/v1/auth/demo");
     }
     return HttpResponse.json(session);
   }),

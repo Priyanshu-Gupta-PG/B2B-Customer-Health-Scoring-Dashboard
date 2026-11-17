@@ -38,29 +38,52 @@ const STORAGE_KEY = "hd.mock.state.v1";
 const SEED = 20260903;
 const ACCOUNT_COUNT = 150;
 
+interface MockSession {
+  userId: string;
+  expiresAt: number;
+}
+
 interface PersistedState {
   rules: ScoringRule[];
   audit: AuditLogEntry[];
   lastSyncAt: string;
   rawOverrides: Record<string, Partial<Record<MetricName, number>>>;
+  sessions?: Record<string, MockSession>;
 }
 
-export const MOCK_USERS: Array<AuthUser & { password: string }> = [
+/** Demo identities only — no plaintext credentials in the client bundle. */
+export const MOCK_USERS: AuthUser[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440000",
     email: "admin@company.com",
-    password: "Admin123!",
     role: "admin",
     name: "David Chen",
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440001",
     email: "csm@company.com",
-    password: "Csm12345!",
     role: "csm",
     name: "Sarah Lopez",
   },
 ];
+
+/** SHA-256 hex digests of demo passwords (plaintext never ships in the bundle). */
+const PASSWORD_DIGESTS: Record<string, string> = {
+  "admin@company.com": "3eb3fe66b31e3b4d10fa70b5cad49c7112294af6ae4e476a1c405155d45aa121",
+  "csm@company.com": "b5ba363c46cafc5b46f1e0690ea91d949b15b6f4f65bd9299a3cffe2c9f4694b",
+};
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function newOpaqueToken(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `mock_${crypto.randomUUID()}`;
+  }
+  return `mock_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
+}
 
 class MockDb {
   private rand = mulberry32(SEED);
@@ -72,6 +95,7 @@ class MockDb {
   private cronStatus: CronStatus = "idle";
   private startedAt = Date.now();
   private scores = new Map<string, number>();
+  private sessions = new Map<string, MockSession>();
   private randomId = () => makeUuid(this.rand);
 
   constructor() {
@@ -82,6 +106,8 @@ class MockDb {
     this.audit = persisted?.audit ?? this.seedAudit(seededRules);
     this.lastSyncAt = persisted?.lastSyncAt ?? new Date(Date.now() - 7 * 60_000).toISOString();
     this.rawOverrides = persisted?.rawOverrides ?? {};
+    this.sessions = new Map(Object.entries(persisted?.sessions ?? {}));
+    this.pruneSessions();
     this.applyOverrides();
     this.recalculateAll();
   }
@@ -100,13 +126,34 @@ class MockDb {
 
   private save() {
     if (typeof window === "undefined") return;
+    this.pruneSessions();
     const state: PersistedState = {
       rules: this.rules,
       audit: this.audit.slice(0, 500),
       lastSyncAt: this.lastSyncAt,
       rawOverrides: this.rawOverrides,
+      sessions: Object.fromEntries(this.sessions),
     };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private pruneSessions() {
+    const now = Date.now();
+    for (const [token, session] of this.sessions) {
+      if (session.expiresAt <= now) this.sessions.delete(token);
+    }
+  }
+
+  private issueSession(user: AuthUser): LoginResponse {
+    const expires = new Date(Date.now() + 24 * 3600 * 1000);
+    const token = newOpaqueToken();
+    this.sessions.set(token, { userId: user.id, expiresAt: expires.getTime() });
+    this.save();
+    return {
+      token,
+      expires_at: expires.toISOString(),
+      user: { id: user.id, email: user.email, role: user.role, name: user.name },
+    };
   }
 
   private applyOverrides() {
@@ -190,37 +237,35 @@ class MockDb {
 
   // ---------- auth ----------
 
-  login(email: string, password: string): LoginResponse | null {
-    const user = MOCK_USERS.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password,
-    );
+  async login(email: string, password: string): Promise<LoginResponse | null> {
+    const normalized = email.trim().toLowerCase();
+    const user = MOCK_USERS.find((u) => u.email.toLowerCase() === normalized);
+    const expected = PASSWORD_DIGESTS[normalized];
+    if (!user || !expected) return null;
+    const digest = await sha256Hex(password);
+    if (digest !== expected) return null;
+    return this.issueSession(user);
+  }
+
+  /** One-click sample login for the mock UI — does not embed credentials in the client. */
+  loginAsDemo(role: AuthUser["role"]): LoginResponse | null {
+    const user = MOCK_USERS.find((u) => u.role === role);
     if (!user) return null;
-    const expires = new Date(Date.now() + 24 * 3600 * 1000);
-    const payload = btoa(
-      JSON.stringify({ sub: user.id, email: user.email, role: user.role, exp: expires.getTime() }),
-    );
-    return {
-      token: `mock.${payload}.sig`,
-      expires_at: expires.toISOString(),
-      user: { id: user.id, email: user.email, role: user.role, name: user.name },
-    };
+    return this.issueSession(user);
   }
 
   userFromToken(token: string | null): AuthUser | null {
-    if (!token || !token.startsWith("mock.")) return null;
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1])) as {
-        sub: string;
-        email: string;
-        role: AuthUser["role"];
-        exp: number;
-      };
-      if (payload.exp <= Date.now()) return null;
-      const user = MOCK_USERS.find((u) => u.id === payload.sub);
-      return user ? { id: user.id, email: user.email, role: user.role, name: user.name } : null;
-    } catch {
+    if (!token || !token.startsWith("mock_")) return null;
+    this.pruneSessions();
+    const session = this.sessions.get(token);
+    if (!session) return null;
+    if (session.expiresAt <= Date.now()) {
+      this.sessions.delete(token);
+      this.save();
       return null;
     }
+    const user = MOCK_USERS.find((u) => u.id === session.userId);
+    return user ? { id: user.id, email: user.email, role: user.role, name: user.name } : null;
   }
 
   // ---------- accounts ----------
