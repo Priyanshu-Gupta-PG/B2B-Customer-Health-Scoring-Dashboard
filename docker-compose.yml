@@ -17,8 +17,8 @@ services:
 
   stripe-mock:
     image: node:20-alpine
-    working_dir: /app
-    command: sh -c "npm ci --omit=dev && node stripe/server.mjs"
+    working_dir: /app/stripe
+    command: sh -c "npm ci --omit=dev && node server.mjs"
     volumes:
       - ./mock-sources:/app
     ports:
@@ -28,8 +28,8 @@ services:
 
   zendesk-mock:
     image: node:20-alpine
-    working_dir: /app
-    command: sh -c "npm ci --omit=dev && node zendesk/server.mjs"
+    working_dir: /app/zendesk
+    command: sh -c "npm ci --omit=dev && node server.mjs"
     volumes:
       - ./mock-sources:/app
     ports:
@@ -39,8 +39,8 @@ services:
 
   product-mock:
     image: node:20-alpine
-    working_dir: /app
-    command: sh -c "npm ci --omit=dev && node product/server.mjs"
+    working_dir: /app/product
+    command: sh -c "npm ci --omit=dev && node server.mjs"
     volumes:
       - ./mock-sources:/app
     ports:

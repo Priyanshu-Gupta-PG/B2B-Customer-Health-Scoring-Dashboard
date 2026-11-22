@@ -9,7 +9,8 @@
     "start:zendesk": "node zendesk/server.mjs",
     "start:product": "node product/server.mjs",
     "start": "node run-all.mjs",
-    "dev": "node run-all.mjs"
+    "dev": "node run-all.mjs",
+    "install:sites": "npm --prefix stripe ci && npm --prefix zendesk ci && npm --prefix product ci"
   },
   "dependencies": {
     "express": "^5.1.0"
