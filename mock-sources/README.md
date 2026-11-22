@@ -35,14 +35,18 @@ each site to reveal masked endpoint/body/env values, then **Reveal** or **Copy**
 `GET` without a body returns the built-in demo catalog (for the website UI).
 `POST` with an `accounts` array is what the dashboard backend uses.
 
-## Vercel
+## Vercel (live)
 
-Create three projects with root directories `mock-sources/stripe`,
-`mock-sources/zendesk`, and `mock-sources/product`. Point the dashboard at the
-production URLs:
+| Site | Production URL |
+|------|----------------|
+| Ledger Wire (Stripe) | https://ledger-wire-stripe-mock.vercel.app |
+| Desk Relay (Zendesk) | https://desk-relay-zendesk-mock.vercel.app |
+| Signal Meter (Product) | https://signal-meter-product-mock.vercel.app |
+
+Point the dashboard backend at these URLs:
 
 ```bash
-STRIPE_MOCK_URL=https://<stripe-project>.vercel.app
-ZENDESK_MOCK_URL=https://<zendesk-project>.vercel.app
-PRODUCT_MOCK_URL=https://<product-project>.vercel.app
+STRIPE_MOCK_URL=https://ledger-wire-stripe-mock.vercel.app
+ZENDESK_MOCK_URL=https://desk-relay-zendesk-mock.vercel.app
+PRODUCT_MOCK_URL=https://signal-meter-product-mock.vercel.app
 ```

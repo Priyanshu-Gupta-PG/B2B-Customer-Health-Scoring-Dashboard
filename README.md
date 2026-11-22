@@ -56,6 +56,8 @@ npm start
 - Zendesk tickets UI: http://localhost:4102  
 - Product usage UI: http://localhost:4103  
 
+Hosted on Vercel: [Ledger Wire](https://ledger-wire-stripe-mock.vercel.app), [Desk Relay](https://desk-relay-zendesk-mock.vercel.app), [Signal Meter](https://signal-meter-product-mock.vercel.app).
+
 Each refresh regenerates values. See [mock-sources/README.md](mock-sources/README.md).
 
 ### 3. API
