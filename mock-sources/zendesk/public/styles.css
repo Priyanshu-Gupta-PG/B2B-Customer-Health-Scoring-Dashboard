@@ -78,6 +78,16 @@ button:disabled {
   opacity: 0.65;
   cursor: wait;
 }
+button.ghost {
+  width: 100%;
+  margin-top: 0.55rem;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+button.ghost:hover {
+  background: rgba(42, 33, 24, 0.06);
+}
 .stamp {
   margin-top: 0.85rem;
   font-family: "IBM Plex Mono", monospace;

@@ -2,6 +2,8 @@ import express from "express";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
+const sharedDir = join(dirname(fileURLToPath(import.meta.url)));
+
 export function createMockApp() {
   const app = express();
   app.use(express.json({ limit: "2mb" }));
@@ -23,6 +25,18 @@ export function createMockApp() {
 
 /** Mount static files AFTER API routes so /mock/* is never shadowed. */
 export function mountStatic(app, publicDir) {
+  app.use(
+    "/vendor",
+    express.static(sharedDir, {
+      etag: false,
+      lastModified: false,
+      setHeaders(res, filePath) {
+        if (filePath.endsWith(".js") || filePath.endsWith(".css")) {
+          res.setHeader("Cache-Control", "no-store");
+        }
+      },
+    }),
+  );
   app.use(
     express.static(publicDir, {
       etag: false,

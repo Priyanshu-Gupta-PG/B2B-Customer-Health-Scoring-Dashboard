@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Manrope:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/vendor/developer-settings.css" />
   </head>
   <body>
     <header>
@@ -22,17 +23,15 @@
           <button type="button" id="refresh" onclick="window.regenerate()">
             Regenerate usage
           </button>
+          <button type="button" id="openDeveloperSettings" class="dev-open-btn ghost">
+            Developer Settings
+          </button>
           <span id="stamp">Waiting…</span>
         </div>
         <p id="status" class="status" role="status" aria-live="polite"></p>
       </div>
     </header>
     <main class="shell">
-      <section class="card">
-        <h2>API for the dashboard</h2>
-        <code>POST /mock/product/usage</code>
-        <p>Metric: <strong>active_logins_30d</strong> → <code>product_usage</code></p>
-      </section>
       <section class="card">
         <div class="head">
           <h2>Tenant activity</h2>
@@ -54,6 +53,7 @@
         </div>
       </section>
     </main>
+    <script src="/vendor/developer-settings.js" defer></script>
     <script src="/app.js" defer></script>
   </body>
 </html>

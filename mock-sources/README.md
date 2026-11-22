@@ -24,22 +24,10 @@ npm run start:zendesk
 npm run start:product
 ```
 
-## Request body (from the dashboard backend)
+## Developer Settings (on each website)
 
-```json
-{
-  "accounts": [
-    { "id": "uuid", "domain": "acmecorp.com", "company_name": "Acme Corp" }
-  ]
-}
-```
+API details are **not** shown on the main page. Open **Developer Settings** on
+each site to reveal masked endpoint/body/env values, then **Reveal** or **Copy**.
 
 `GET` without a body returns the built-in demo catalog (for the website UI).
-
-## Metric mapping
-
-| Source | Response field | Dashboard metric |
-|--------|----------------|------------------|
-| Stripe | `overdue_invoices` / `metric.value` | `overdue_invoice` |
-| Zendesk | `open_tickets` / `metric.value` | `support_tickets` |
-| Product | `active_logins_30d` / `metric.value` | `product_usage` |
+`POST` with an `accounts` array is what the dashboard backend uses.

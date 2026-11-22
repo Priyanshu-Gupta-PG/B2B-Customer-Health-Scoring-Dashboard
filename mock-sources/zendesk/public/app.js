@@ -84,6 +84,21 @@
         regenerate();
       });
     }
+    if (typeof window.mountDeveloperSettings === "function") {
+      const origin = window.location.origin;
+      window.mountDeveloperSettings({
+        fields: [
+          { label: "Endpoint URL", value: `${origin}${ENDPOINT}` },
+          { label: "HTTP method", value: "POST" },
+          {
+            label: "Request body",
+            value: '{"accounts":[{"id":"<account-id>","domain":"<domain>","company_name":"<name>"}]}',
+          },
+          { label: "Score metric", value: "open_tickets → support_tickets" },
+          { label: "Env var for dashboard", value: `ZENDESK_MOCK_URL=${origin}` },
+        ],
+      });
+    }
     regenerate();
   }
 

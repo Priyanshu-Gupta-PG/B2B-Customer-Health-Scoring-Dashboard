@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/vendor/developer-settings.css" />
   </head>
   <body>
     <div class="stage">
@@ -18,13 +19,11 @@
           Random open-ticket counts for each account. Click the button to pull a
           brand-new ticket board for the health dashboard.
         </p>
-        <div class="api">
-          <h2>Dashboard endpoint</h2>
-          <code>POST /mock/zendesk/tickets</code>
-          <p>Metric: <strong>open_tickets</strong> → <code>support_tickets</code></p>
-        </div>
         <button type="button" id="refresh" onclick="window.regenerate()">
           Pull new tickets
+        </button>
+        <button type="button" id="openDeveloperSettings" class="dev-open-btn ghost">
+          Developer Settings
         </button>
         <p class="stamp" id="stamp">Waiting…</p>
         <p id="status" class="status" role="status" aria-live="polite"></p>
@@ -50,6 +49,7 @@
         </div>
       </main>
     </div>
+    <script src="/vendor/developer-settings.js" defer></script>
     <script src="/app.js" defer></script>
   </body>
 </html>
