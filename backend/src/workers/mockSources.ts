@@ -1,4 +1,9 @@
 import { logger } from "../infrastructure/logger.js";
+import {
+  DEFAULT_PRODUCT_MOCK_URL,
+  DEFAULT_STRIPE_MOCK_URL,
+  DEFAULT_ZENDESK_MOCK_URL,
+} from "./mockSourceDefaults.js";
 
 export type MockAccountRef = {
   id: string;
@@ -21,11 +26,11 @@ type SourceRow = {
   active_logins_30d?: number;
 };
 
-function sourceUrls() {
+export function sourceUrls() {
   return {
-    stripe: process.env.STRIPE_MOCK_URL ?? "http://localhost:4101",
-    zendesk: process.env.ZENDESK_MOCK_URL ?? "http://localhost:4102",
-    product: process.env.PRODUCT_MOCK_URL ?? "http://localhost:4103",
+    stripe: process.env.STRIPE_MOCK_URL || DEFAULT_STRIPE_MOCK_URL,
+    zendesk: process.env.ZENDESK_MOCK_URL || DEFAULT_ZENDESK_MOCK_URL,
+    product: process.env.PRODUCT_MOCK_URL || DEFAULT_PRODUCT_MOCK_URL,
   };
 }
 
@@ -63,14 +68,14 @@ async function postSource(url: string, path: string, accounts: MockAccountRef[])
   return Array.isArray(json.data) ? json.data : [];
 }
 
-/** True when all three mock website base URLs are present (including defaults). */
+/** True when all three mock website base URLs resolve to non-empty strings. */
 export function mockSourcesConfigured() {
   const urls = sourceUrls();
   return Boolean(urls.stripe && urls.zendesk && urls.product);
 }
 
 /**
- * Pull fresh random metrics from the three mock websites.
+ * Pull fresh metrics from the three mock websites (Stripe / Zendesk / product usage).
  * Values change on every successful fetch.
  */
 export async function fetchMetricsFromMockSources(

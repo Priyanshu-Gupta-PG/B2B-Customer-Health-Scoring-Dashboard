@@ -4,10 +4,6 @@ import { logger } from "../infrastructure/logger.js";
 import { ScoringCalculator } from "../engine/ScoringCalculator.js";
 import { fetchMetricsFromMockSources, mockSourcesConfigured } from "./mockSources.js";
 
-function jitter(value: number, spread: number, floor = 0) {
-  return Math.max(floor, value + Math.round((Math.random() - 0.5) * spread));
-}
-
 export async function acquireLock(name: string): Promise<boolean> {
   try {
     await prisma.jobLock.create({ data: { name, lockedAt: new Date() } });
@@ -51,24 +47,6 @@ async function applyMetrics(
   });
 }
 
-/** Local fallback when mock websites are unreachable (keeps tests / offline demos working). */
-async function ingestWithLocalJitter() {
-  const accounts = await prisma.account.findMany({ include: { metrics: true } });
-  let updated = 0;
-  for (const account of accounts) {
-    if (Math.random() > 0.2) continue;
-    const current = Object.fromEntries(account.metrics.map((m) => [m.metricType, Number(m.metricValue)]));
-    const next = {
-      product_usage: jitter(current.product_usage ?? 20, 10),
-      support_tickets: jitter(current.support_tickets ?? 1, 3),
-      overdue_invoice: jitter(current.overdue_invoice ?? 0, 2),
-    };
-    await applyMetrics(account.id, next, new Date());
-    updated += 1;
-  }
-  return updated;
-}
-
 async function ingestFromMockWebsites() {
   const accounts = await prisma.account.findMany({
     select: { id: true, domain: true, companyName: true },
@@ -100,26 +78,19 @@ export async function runIngestion() {
   }
 
   try {
+    if (!mockSourcesConfigured()) {
+      throw new Error(
+        "Mock source URLs are not configured (STRIPE_MOCK_URL, ZENDESK_MOCK_URL, PRODUCT_MOCK_URL)",
+      );
+    }
+
     await prisma.systemState.upsert({
       where: { id: "singleton" },
       create: { id: "singleton", cronStatus: "running" },
       update: { cronStatus: "running" },
     });
 
-    let updated = 0;
-    let mode: "mock-websites" | "local-jitter" = "local-jitter";
-    if (mockSourcesConfigured()) {
-      try {
-        updated = await ingestFromMockWebsites();
-        mode = "mock-websites";
-      } catch (err) {
-        logger.warn({ err }, "mock websites unreachable — falling back to local jitter");
-        updated = await ingestWithLocalJitter();
-      }
-    } else {
-      updated = await ingestWithLocalJitter();
-    }
-
+    const updated = await ingestFromMockWebsites();
     const result = await recalculateAll();
     await prisma.systemState.upsert({
       where: { id: "singleton" },
@@ -127,15 +98,17 @@ export async function runIngestion() {
       update: { cronStatus: "idle", lastIngestionAt: new Date() },
     });
     logger.info(
-      { accounts: result.accounts, updated, mode, durationMs: result.durationMs },
+      { accounts: result.accounts, updated, mode: "mock-websites", durationMs: result.durationMs },
       "ingestion complete",
     );
-    return { skipped: false, accounts: result.accounts, updated, mode };
+    return { skipped: false, accounts: result.accounts, updated, mode: "mock-websites" as const };
   } catch (err) {
-    await prisma.systemState.update({
-      where: { id: "singleton" },
-      data: { cronStatus: "stalled" },
-    }).catch(() => undefined);
+    await prisma.systemState
+      .update({
+        where: { id: "singleton" },
+        data: { cronStatus: "stalled" },
+      })
+      .catch(() => undefined);
     logger.error({ err }, "ingestion failed");
     throw err;
   } finally {

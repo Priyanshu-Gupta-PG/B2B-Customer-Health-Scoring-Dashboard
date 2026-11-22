@@ -3,6 +3,11 @@ import { generateKeyPairSync } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
+import {
+  DEFAULT_PRODUCT_MOCK_URL,
+  DEFAULT_STRIPE_MOCK_URL,
+  DEFAULT_ZENDESK_MOCK_URL,
+} from "../workers/mockSourceDefaults.js";
 
 dotenv.config();
 
@@ -55,12 +60,12 @@ export const config = {
   ingestCron: process.env.INGEST_CRON ?? "*/15 * * * *",
   snapshotCron: process.env.SNAPSHOT_CRON ?? "0 0 * * *",
   seedAccountCount: Number(process.env.SEED_ACCOUNT_COUNT ?? 150),
-  /** Dummy Stripe invoice website (Ledger Wire). */
-  stripeMockUrl: process.env.STRIPE_MOCK_URL ?? "http://localhost:4101",
-  /** Dummy Zendesk ticket website (Desk Relay). */
-  zendeskMockUrl: process.env.ZENDESK_MOCK_URL ?? "http://localhost:4102",
-  /** Dummy product-usage website (Signal Meter). */
-  productMockUrl: process.env.PRODUCT_MOCK_URL ?? "http://localhost:4103",
+  /** Stripe invoice mock website (Ledger Wire). */
+  stripeMockUrl: process.env.STRIPE_MOCK_URL || DEFAULT_STRIPE_MOCK_URL,
+  /** Zendesk ticket mock website (Desk Relay). */
+  zendeskMockUrl: process.env.ZENDESK_MOCK_URL || DEFAULT_ZENDESK_MOCK_URL,
+  /** Product-usage mock website (Signal Meter). */
+  productMockUrl: process.env.PRODUCT_MOCK_URL || DEFAULT_PRODUCT_MOCK_URL,
   jwt: {
     privateKey: keys.privateKey,
     publicKey: keys.publicKey,

@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
-import { ScoringCalculator, METRIC_NORMALISERS } from "../src/engine/ScoringCalculator.js";
+import { ScoringCalculator } from "../src/engine/ScoringCalculator.js";
+import { fetchMetricsFromMockSources } from "../src/workers/mockSources.js";
+import { recalculateAll } from "../src/engine/RecalculationService.js";
 
 dotenv.config();
 
@@ -45,26 +47,6 @@ const SUFFIXES = [
 const PLANS = ["Starter", "Growth", "Business", "Enterprise"] as const;
 const CSMS = ["Sarah Lopez", "Marcus Reed", "Priya Nair", "Tom Becker", "Elena Rossi"];
 
-type Rule = {
-  id: string;
-  metricName: string;
-  weightPercentage: number;
-  impactDirection: "positive" | "negative";
-  threshold: number | null;
-};
-
-function scoreOf(raw: Record<string, number>, rules: Rule[]) {
-  return ScoringCalculator.calculate(
-    rules.map((r) => ({
-      metricType: r.metricName,
-      rawValue: raw[r.metricName] ?? 0,
-      weight: r.weightPercentage,
-      direction: r.impactDirection,
-      normaliseBy: METRIC_NORMALISERS[r.metricName] ?? 1,
-    })),
-  );
-}
-
 async function main() {
   const rand = mulberry32(20260903);
   const count = Number(process.env.SEED_ACCOUNT_COUNT ?? 150);
@@ -98,8 +80,8 @@ async function main() {
     ],
   });
 
-  const rules: Rule[] = [
-    { id: makeUuid(rand), metricName: "product_usage", weightPercentage: 40, impactDirection: "positive", threshold: null },
+  const rules = [
+    { id: makeUuid(rand), metricName: "product_usage", weightPercentage: 40, impactDirection: "positive", threshold: null as number | null },
     { id: makeUuid(rand), metricName: "support_tickets", weightPercentage: 30, impactDirection: "negative", threshold: 40 },
     { id: makeUuid(rand), metricName: "overdue_invoice", weightPercentage: 30, impactDirection: "negative", threshold: 40 },
   ];
@@ -117,86 +99,77 @@ async function main() {
   const used = new Set<string>();
   const now = Date.now();
   const DAY = 86_400_000;
+  const accountRefs: { id: string; domain: string; company_name: string }[] = [];
 
   while (used.size < count) {
     const name = `${PREFIXES[Math.floor(rand() * PREFIXES.length)]} ${SUFFIXES[Math.floor(rand() * SUFFIXES.length)]}`;
     if (used.has(name)) continue;
     used.add(name);
 
-    const roll = rand();
-    const archetype = roll < 0.55 ? "healthy" : roll < 0.85 ? "drifting" : "critical";
     const plan = PLANS[Math.floor(rand() * PLANS.length)];
     const planBase = { Starter: 6_000, Growth: 24_000, Business: 72_000, Enterprise: 180_000 }[plan];
     const arr = Math.round((planBase * (0.6 + rand() * 1.4)) / 100) * 100;
-
-    let logins: number;
-    let tickets: number;
-    let overdue: number;
-    let inactiveDays: number;
-    if (archetype === "healthy") {
-      logins = 38 + Math.floor(rand() * 40);
-      tickets = Math.floor(rand() * 3);
-      overdue = rand() < 0.1 ? 1 : 0;
-      inactiveDays = Math.floor(rand() * 3);
-    } else if (archetype === "drifting") {
-      logins = 12 + Math.floor(rand() * 30);
-      tickets = 2 + Math.floor(rand() * 5);
-      overdue = rand() < 0.45 ? 1 + Math.floor(rand() * 2) : 0;
-      inactiveDays = 2 + Math.floor(rand() * 8);
-    } else {
-      logins = Math.floor(rand() * 14);
-      tickets = 4 + Math.floor(rand() * 8);
-      overdue = 1 + Math.floor(rand() * 5);
-      inactiveDays = 8 + Math.floor(rand() * 25);
-    }
-
-    const raw = { product_usage: logins, support_tickets: tickets, overdue_invoice: overdue };
-    const current = scoreOf(raw, rules);
-    const status = ScoringCalculator.getStatusTier(current);
+    const inactiveDays = Math.floor(rand() * 14);
     const createdDaysAgo = 120 + Math.floor(rand() * 700);
     const id = makeUuid(rand);
+    const domain = `${name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.com`;
 
     await prisma.account.create({
       data: {
         id,
         companyName: name,
-        domain: `${name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.com`,
+        domain,
         plan,
         ownerCsm: CSMS[Math.floor(rand() * CSMS.length)],
         arr,
-        currentScore: current,
-        healthStatus: status,
+        currentScore: 0,
+        healthStatus: "Critical",
         lastActiveAt: new Date(now - inactiveDays * DAY - Math.floor(rand() * DAY)),
         createdAt: new Date(now - createdDaysAgo * DAY),
-        metrics: {
-          create: [
-            { sourceApi: "product", metricType: "product_usage", metricValue: logins },
-            { sourceApi: "zendesk", metricType: "support_tickets", metricValue: tickets },
-            { sourceApi: "stripe", metricType: "overdue_invoice", metricValue: overdue },
-          ],
-        },
       },
     });
-
-    const history: { accountId: string; calculatedScore: number; healthStatus: string; recordedAt: Date }[] = [];
-    const endGuess = archetype === "healthy" ? 82 : archetype === "drifting" ? 52 : 22;
-    let v = endGuess;
-    for (let d = 89; d >= 0; d--) {
-      const score = d === 89 ? current : Math.max(0, Math.min(100, Math.round(v)));
-      history.push({
-        accountId: id,
-        calculatedScore: score,
-        healthStatus: ScoringCalculator.getStatusTier(score),
-        recordedAt: new Date(now - (89 - d) * DAY),
-      });
-      const drift = archetype === "critical" ? 0.55 : archetype === "drifting" ? 0.2 : 0.02;
-      v = v + drift + (rand() - 0.5) * 4;
-    }
-    await prisma.scoreSnapshot.createMany({ data: history });
+    accountRefs.push({ id, domain, company_name: name });
   }
 
+  console.log(`Created ${accountRefs.length} accounts. Fetching metrics from mock websites…`);
+  const fetched = await fetchMetricsFromMockSources(accountRefs);
+  if (fetched.size === 0) {
+    throw new Error("Mock websites returned no metrics — seed aborted (no synthetic fallback)");
+  }
+
+  const recordedAt = new Date();
+  let applied = 0;
+  for (const account of accountRefs) {
+    const metrics = fetched.get(account.id);
+    if (!metrics) continue;
+    await prisma.accountMetric.createMany({
+      data: [
+        { accountId: account.id, sourceApi: "product", metricType: "product_usage", metricValue: metrics.product_usage, recordedAt },
+        { accountId: account.id, sourceApi: "zendesk", metricType: "support_tickets", metricValue: metrics.support_tickets, recordedAt },
+        { accountId: account.id, sourceApi: "stripe", metricType: "overdue_invoice", metricValue: metrics.overdue_invoice, recordedAt },
+      ],
+    });
+    applied += 1;
+  }
+
+  const { accounts: scored } = await recalculateAll();
+
+  const scoredAccounts = await prisma.account.findMany({
+    select: { id: true, currentScore: true, healthStatus: true },
+  });
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  await prisma.scoreSnapshot.createMany({
+    data: scoredAccounts.map((a) => ({
+      accountId: a.id,
+      calculatedScore: a.currentScore,
+      healthStatus: a.healthStatus || ScoringCalculator.getStatusTier(a.currentScore),
+      recordedAt: today,
+    })),
+  });
+
   await prisma.systemState.create({
-    data: { id: "singleton", cronStatus: "idle", lastIngestionAt: new Date(now - 7 * 60_000) },
+    data: { id: "singleton", cronStatus: "idle", lastIngestionAt: recordedAt },
   });
 
   await prisma.auditLog.create({
@@ -211,7 +184,9 @@ async function main() {
     },
   });
 
-  console.log(`Seeded ${count} accounts, 2 users, 3 rules.`);
+  console.log(
+    `Seeded ${accountRefs.length} accounts from mock websites (${applied} with metrics, ${scored} scored).`,
+  );
 }
 
 main()

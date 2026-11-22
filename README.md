@@ -66,14 +66,17 @@ Each refresh regenerates values. See [mock-sources/README.md](mock-sources/READM
 bash backend/dev.sh
 ```
 
-Point the API at the mock websites (defaults already match local ports):
+Point the API at the hosted mock websites (these are the defaults):
 
 ```bash
 # backend/.env
-STRIPE_MOCK_URL=http://localhost:4101
-ZENDESK_MOCK_URL=http://localhost:4102
-PRODUCT_MOCK_URL=http://localhost:4103
+STRIPE_MOCK_URL=https://ledger-wire-stripe-mock.vercel.app
+ZENDESK_MOCK_URL=https://desk-relay-zendesk-mock.vercel.app
+PRODUCT_MOCK_URL=https://signal-meter-product-mock.vercel.app
 ```
+
+Health scores are calculated only from metrics returned by those three sites
+(no local synthetic / jitter fallback).
 
 ### 4. UI (another terminal)
 
