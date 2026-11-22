@@ -1,10 +1,10 @@
-import { createMockApp, listen, publicPath } from "../shared/http.mjs";
+import { createMockApp, listen, mountStatic, publicPath } from "../shared/http.mjs";
 import { normalizeAccounts } from "../shared/accounts.mjs";
 import { isoNow, randomInt } from "../shared/random.mjs";
 
 process.env.MOCK_SERVICE_NAME = "product-mock";
 const PORT = Number(process.env.PORT ?? 4103);
-const app = createMockApp({ publicDir: publicPath(import.meta.url) });
+const app = createMockApp();
 
 function buildPayload(accounts) {
   return {
@@ -33,6 +33,7 @@ function buildPayload(accounts) {
 }
 
 function handleUsage(req, res) {
+  res.setHeader("Cache-Control", "no-store");
   const accounts = normalizeAccounts(req.method === "POST" ? req.body : { accounts: undefined });
   res.json(buildPayload(accounts));
 }
@@ -42,4 +43,5 @@ app.post("/mock/product/usage", handleUsage);
 app.get("/api/usage", handleUsage);
 app.post("/api/usage", handleUsage);
 
+mountStatic(app, publicPath(import.meta.url));
 await listen(app, PORT, "Product usage mock");

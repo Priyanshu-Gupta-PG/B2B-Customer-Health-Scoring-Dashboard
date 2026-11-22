@@ -15,23 +15,26 @@
         <p class="brand">Desk Relay</p>
         <h1>Zendesk ticket mock</h1>
         <p class="lede">
-          Random open-ticket counts for each account. The health dashboard
-          pulls this feed on every ingest so support pressure keeps moving.
+          Random open-ticket counts for each account. Click the button to pull a
+          brand-new ticket board for the health dashboard.
         </p>
         <div class="api">
           <h2>Dashboard endpoint</h2>
           <code>POST /mock/zendesk/tickets</code>
           <p>Metric: <strong>open_tickets</strong> → <code>support_tickets</code></p>
         </div>
-        <button type="button" id="refresh">Pull new tickets</button>
+        <button type="button" id="refresh" onclick="window.regenerate()">
+          Pull new tickets
+        </button>
         <p class="stamp" id="stamp">Waiting…</p>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
       </aside>
       <main>
         <div class="bar">
           <h2>Open ticket board</h2>
           <span id="count"></span>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap" id="tablePanel">
           <table>
             <thead>
               <tr>
@@ -47,6 +50,6 @@
         </div>
       </main>
     </div>
-    <script src="/app.js"></script>
+    <script src="/app.js" defer></script>
   </body>
 </html>

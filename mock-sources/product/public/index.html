@@ -15,13 +15,16 @@
         <p class="brand">Signal Meter</p>
         <h1>Product usage mock</h1>
         <p class="lede">
-          Active logins (30d) and session signals regenerate on every request so
-          the health dashboard always ingests a moving product pulse.
+          Active logins (30d) regenerate when you click the button so the health
+          dashboard can ingest a moving product pulse.
         </p>
         <div class="actions">
-          <button type="button" id="refresh">Regenerate usage</button>
+          <button type="button" id="refresh" onclick="window.regenerate()">
+            Regenerate usage
+          </button>
           <span id="stamp">Waiting…</span>
         </div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
       </div>
     </header>
     <main class="shell">
@@ -35,7 +38,7 @@
           <h2>Tenant activity</h2>
           <span id="count"></span>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap" id="tablePanel">
           <table>
             <thead>
               <tr>
@@ -51,6 +54,6 @@
         </div>
       </section>
     </main>
-    <script src="/app.js"></script>
+    <script src="/app.js" defer></script>
   </body>
 </html>

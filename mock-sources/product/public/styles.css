@@ -59,12 +59,35 @@ button {
   font-weight: 600;
   padding: 0.7rem 1.05rem;
   cursor: pointer;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 button:hover { background: #0b7f75; }
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
 #stamp, #count {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.8rem;
   color: var(--muted);
+}
+.status {
+  min-height: 1.25rem;
+  margin: 0.7rem 0 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.status[data-kind="ok"] { color: var(--accent); }
+.status[data-kind="err"] { color: #b42318; }
+.table-wrap.flash {
+  animation: flash 0.45s ease;
+}
+@keyframes flash {
+  from { background: #c9ebe2; }
+  to { background: transparent; }
 }
 main {
   display: grid;

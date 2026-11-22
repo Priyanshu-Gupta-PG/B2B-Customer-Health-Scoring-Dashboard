@@ -1,10 +1,10 @@
-import { createMockApp, listen, publicPath } from "../shared/http.mjs";
+import { createMockApp, listen, mountStatic, publicPath } from "../shared/http.mjs";
 import { normalizeAccounts } from "../shared/accounts.mjs";
 import { isoNow, pick, randomInt } from "../shared/random.mjs";
 
 process.env.MOCK_SERVICE_NAME = "stripe-mock";
 const PORT = Number(process.env.PORT ?? 4101);
-const app = createMockApp({ publicDir: publicPath(import.meta.url) });
+const app = createMockApp();
 
 const STATUSES = ["open", "past_due", "paid", "void"];
 
@@ -37,6 +37,7 @@ function buildPayload(accounts) {
 }
 
 function handleInvoices(req, res) {
+  res.setHeader("Cache-Control", "no-store");
   const accounts = normalizeAccounts(req.method === "POST" ? req.body : { accounts: undefined });
   res.json(buildPayload(accounts));
 }
@@ -46,4 +47,5 @@ app.post("/mock/stripe/invoices", handleInvoices);
 app.get("/api/invoices", handleInvoices);
 app.post("/api/invoices", handleInvoices);
 
+mountStatic(app, publicPath(import.meta.url));
 await listen(app, PORT, "Stripe mock");

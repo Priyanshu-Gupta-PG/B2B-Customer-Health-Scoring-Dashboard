@@ -73,8 +73,32 @@ button {
   font-weight: 500;
   padding: 0.7rem 1rem;
   cursor: pointer;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 button:hover { background: #163652; }
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.status {
+  min-height: 1.25rem;
+  margin: 0.65rem 0 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.status[data-kind="ok"] { color: var(--accent); }
+.status[data-kind="err"] { color: var(--warn); }
+.status[data-kind="busy"] { color: var(--muted); }
+.table-wrap.flash {
+  animation: flash 0.45s ease;
+}
+@keyframes flash {
+  from { background: #d7f3ee; }
+  to { background: transparent; }
+}
 main { padding-bottom: 4rem; display: grid; gap: 1.25rem; }
 .panel {
   background: rgba(255, 255, 255, 0.72);
