@@ -1,0 +1,17 @@
+{
+  "name": "health-dashboard-mock-sources",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Three dummy data websites (Stripe, Zendesk, Product Usage) for the health scoring dashboard",
+  "scripts": {
+    "start:stripe": "node stripe/server.mjs",
+    "start:zendesk": "node zendesk/server.mjs",
+    "start:product": "node product/server.mjs",
+    "start": "node run-all.mjs",
+    "dev": "node run-all.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

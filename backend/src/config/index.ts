@@ -55,6 +55,12 @@ export const config = {
   ingestCron: process.env.INGEST_CRON ?? "*/15 * * * *",
   snapshotCron: process.env.SNAPSHOT_CRON ?? "0 0 * * *",
   seedAccountCount: Number(process.env.SEED_ACCOUNT_COUNT ?? 150),
+  /** Dummy Stripe invoice website (Ledger Wire). */
+  stripeMockUrl: process.env.STRIPE_MOCK_URL ?? "http://localhost:4101",
+  /** Dummy Zendesk ticket website (Desk Relay). */
+  zendeskMockUrl: process.env.ZENDESK_MOCK_URL ?? "http://localhost:4102",
+  /** Dummy product-usage website (Signal Meter). */
+  productMockUrl: process.env.PRODUCT_MOCK_URL ?? "http://localhost:4103",
   jwt: {
     privateKey: keys.privateKey,
     publicKey: keys.publicKey,

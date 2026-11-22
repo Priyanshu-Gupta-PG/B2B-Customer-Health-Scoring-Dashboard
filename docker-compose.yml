@@ -15,6 +15,39 @@ services:
       timeout: 5s
       retries: 10
 
+  stripe-mock:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm ci --omit=dev && node stripe/server.mjs"
+    volumes:
+      - ./mock-sources:/app
+    ports:
+      - "4101:4101"
+    environment:
+      PORT: 4101
+
+  zendesk-mock:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm ci --omit=dev && node zendesk/server.mjs"
+    volumes:
+      - ./mock-sources:/app
+    ports:
+      - "4102:4102"
+    environment:
+      PORT: 4102
+
+  product-mock:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm ci --omit=dev && node product/server.mjs"
+    volumes:
+      - ./mock-sources:/app
+    ports:
+      - "4103:4103"
+    environment:
+      PORT: 4103
+
   api:
     build: ./backend
     ports:
@@ -25,9 +58,18 @@ services:
       DATABASE_URL: postgresql://health_user:health_password@postgres:5432/health_db
       FRONTEND_ORIGIN: http://localhost:3000
       LOG_LEVEL: info
+      STRIPE_MOCK_URL: http://stripe-mock:4101
+      ZENDESK_MOCK_URL: http://zendesk-mock:4102
+      PRODUCT_MOCK_URL: http://product-mock:4103
     depends_on:
       postgres:
         condition: service_healthy
+      stripe-mock:
+        condition: service_started
+      zendesk-mock:
+        condition: service_started
+      product-mock:
+        condition: service_started
 
 volumes:
   pgdata:

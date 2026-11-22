@@ -65,6 +65,8 @@ npm run db:seed
 
 - Ingestion every 15 minutes (jitter mock Stripe / Zendesk / usage metrics, then recalc)
 - Daily midnight score snapshots for Recharts
-- Manual `POST /api/v1/ingest/trigger` (admin JWT)
+- Manual `POST /api/v1/ingest/trigger` (admin JWT) pulls Stripe / Zendesk / Product
+  mock websites (`STRIPE_MOCK_URL`, `ZENDESK_MOCK_URL`, `PRODUCT_MOCK_URL`) and
+  falls back to local jitter if they are unreachable
 
 Auth is RS256 JWT. In development, keys are created in `backend/.dev-keys/` on first start.

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Desk Relay — Zendesk mock tickets</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="stage">
+      <aside>
+        <p class="brand">Desk Relay</p>
+        <h1>Zendesk ticket mock</h1>
+        <p class="lede">
+          Random open-ticket counts for each account. The health dashboard
+          pulls this feed on every ingest so support pressure keeps moving.
+        </p>
+        <div class="api">
+          <h2>Dashboard endpoint</h2>
+          <code>POST /mock/zendesk/tickets</code>
+          <p>Metric: <strong>open_tickets</strong> → <code>support_tickets</code></p>
+        </div>
+        <button type="button" id="refresh">Pull new tickets</button>
+        <p class="stamp" id="stamp">Waiting…</p>
+      </aside>
+      <main>
+        <div class="bar">
+          <h2>Open ticket board</h2>
+          <span id="count"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Organization</th>
+                <th>Domain</th>
+                <th>Open</th>
+                <th>Pending</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+</html>

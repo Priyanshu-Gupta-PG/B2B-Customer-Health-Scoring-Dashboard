@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signal Meter — Product usage mock</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Manrope:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="shell">
+        <p class="brand">Signal Meter</p>
+        <h1>Product usage mock</h1>
+        <p class="lede">
+          Active logins (30d) and session signals regenerate on every request so
+          the health dashboard always ingests a moving product pulse.
+        </p>
+        <div class="actions">
+          <button type="button" id="refresh">Regenerate usage</button>
+          <span id="stamp">Waiting…</span>
+        </div>
+      </div>
+    </header>
+    <main class="shell">
+      <section class="card">
+        <h2>API for the dashboard</h2>
+        <code>POST /mock/product/usage</code>
+        <p>Metric: <strong>active_logins_30d</strong> → <code>product_usage</code></p>
+      </section>
+      <section class="card">
+        <div class="head">
+          <h2>Tenant activity</h2>
+          <span id="count"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tenant</th>
+                <th>Domain</th>
+                <th>Logins 30d</th>
+                <th>Users 7d</th>
+                <th>Last seen</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
