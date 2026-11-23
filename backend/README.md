@@ -63,8 +63,10 @@ npm run db:seed
 
 ## Jobs
 
-- Ingestion every 15 minutes (jitter mock Stripe / Zendesk / usage metrics, then recalc)
+- Ingestion every 15 minutes pulls live metrics from the three mock websites, then recalculates scores
 - Daily midnight score snapshots for Recharts
-- Manual `POST /api/v1/ingest/trigger` (admin JWT)
+- Manual `POST /api/v1/ingest/trigger` (admin JWT) requires
+  `STRIPE_MOCK_URL`, `ZENDESK_MOCK_URL`, and `PRODUCT_MOCK_URL`
+  (defaults to the hosted Vercel deployments; no local synthetic fallback)
 
 Auth is RS256 JWT. In development, keys are created in `backend/.dev-keys/` on first start.

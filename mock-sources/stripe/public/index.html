@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ledger Wire — Stripe mock invoices</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/vendor/developer-settings.css" />
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true"></div>
+    <header class="shell">
+      <p class="brand">Ledger Wire</p>
+      <h1>Stripe invoice mock</h1>
+      <p class="lede">
+        Dummy billing feed for the Customer Health dashboard. Click the button
+        to regenerate overdue invoice counts immediately.
+      </p>
+      <div class="meta">
+        <span id="stamp">Waiting…</span>
+        <button type="button" id="refresh" onclick="window.regenerate()">
+          Fetch new invoices
+        </button>
+        <button type="button" id="openDeveloperSettings" class="dev-open-btn ghost">
+          Developer Settings
+        </button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </header>
+    <main class="shell">
+      <section class="panel">
+        <div class="table-head">
+          <h2>Live invoice snapshot</h2>
+          <span class="pulse" id="count"></span>
+        </div>
+        <div class="table-wrap" id="tablePanel">
+          <table>
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Domain</th>
+                <th>Overdue</th>
+                <th>Open</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script src="/vendor/developer-settings.js" defer></script>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

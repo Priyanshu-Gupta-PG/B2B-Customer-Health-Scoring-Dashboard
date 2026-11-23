@@ -15,6 +15,44 @@ services:
       timeout: 5s
       retries: 10
 
+  # Optional local stand-ins for the Vercel mock websites.
+  # Start with: docker compose --profile local-mocks up
+  stripe-mock:
+    profiles: ["local-mocks"]
+    image: node:20-alpine
+    working_dir: /app/stripe
+    command: sh -c "npm ci --omit=dev && node server.mjs"
+    volumes:
+      - ./mock-sources:/app
+    ports:
+      - "4101:4101"
+    environment:
+      PORT: 4101
+
+  zendesk-mock:
+    profiles: ["local-mocks"]
+    image: node:20-alpine
+    working_dir: /app/zendesk
+    command: sh -c "npm ci --omit=dev && node server.mjs"
+    volumes:
+      - ./mock-sources:/app
+    ports:
+      - "4102:4102"
+    environment:
+      PORT: 4102
+
+  product-mock:
+    profiles: ["local-mocks"]
+    image: node:20-alpine
+    working_dir: /app/product
+    command: sh -c "npm ci --omit=dev && node server.mjs"
+    volumes:
+      - ./mock-sources:/app
+    ports:
+      - "4103:4103"
+    environment:
+      PORT: 4103
+
   api:
     build: ./backend
     ports:
@@ -25,6 +63,9 @@ services:
       DATABASE_URL: postgresql://health_user:health_password@postgres:5432/health_db
       FRONTEND_ORIGIN: http://localhost:3000
       LOG_LEVEL: info
+      STRIPE_MOCK_URL: https://ledger-wire-stripe-mock.vercel.app
+      ZENDESK_MOCK_URL: https://desk-relay-zendesk-mock.vercel.app
+      PRODUCT_MOCK_URL: https://signal-meter-product-mock.vercel.app
     depends_on:
       postgres:
         condition: service_healthy

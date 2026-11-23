@@ -28,13 +28,14 @@ import {
   mulberry32,
   type SeedAccount,
 } from "./seed";
+import { fetchMetricsFromMockSources } from "./mockSources";
 
 /**
  * In-memory mock database. Rules, audit log and sync metadata persist to localStorage so
  * admin changes survive a refresh; accounts are rebuilt from the deterministic seed.
  */
 
-const STORAGE_KEY = "hd.mock.state.v1";
+const STORAGE_KEY = "hd.mock.state.v2";
 const SEED = 20260903;
 const ACCOUNT_COUNT = 150;
 
@@ -437,6 +438,33 @@ class MockDb {
 
   // ---------- system ----------
 
+  /** Pull metrics for every account from the three live mock websites. */
+  async hydrateFromMockWebsites(): Promise<number> {
+    const fetched = await fetchMetricsFromMockSources(
+      this.accounts.map((a) => ({
+        id: a.id,
+        domain: a.domain,
+        company_name: a.company_name,
+      })),
+    );
+    let updated = 0;
+    for (const acc of this.accounts) {
+      const metrics = fetched.get(acc.id);
+      if (!metrics) continue;
+      acc.raw = { ...metrics };
+      this.rawOverrides[acc.id] = { ...acc.raw };
+      updated += 1;
+    }
+    this.recalculateAll();
+    for (const acc of this.accounts) {
+      const score = this.scores.get(acc.id) ?? 0;
+      acc.history = [...acc.history.slice(0, -1), score];
+    }
+    this.lastSyncAt = new Date().toISOString();
+    this.save();
+    return updated;
+  }
+
   triggerIngest(actor: AuthUser) {
     if (this.cronStatus === "running") return { already: true };
     this.cronStatus = "running";
@@ -446,23 +474,15 @@ class MockDb {
     });
     this.save();
 
-    setTimeout(() => {
-      // Simulate fresh data: nudge ~20% of accounts' raw metrics.
-      const jitter = mulberry32(Date.now() % 100_000);
-      for (const acc of this.accounts) {
-        if (jitter() > 0.2) continue;
-        const next: Partial<Record<MetricName, number>> = {};
-        next.product_usage = Math.max(0, acc.raw.product_usage + Math.round((jitter() - 0.5) * 10));
-        next.support_tickets = Math.max(0, acc.raw.support_tickets + Math.round((jitter() - 0.5) * 3));
-        next.overdue_invoice = Math.max(0, acc.raw.overdue_invoice + Math.round((jitter() - 0.55) * 2));
-        acc.raw = { ...acc.raw, ...next };
-        this.rawOverrides[acc.id] = { ...acc.raw };
+    void (async () => {
+      try {
+        await this.hydrateFromMockWebsites();
+        this.cronStatus = "idle";
+      } catch {
+        this.cronStatus = "stalled";
       }
-      this.recalculateAll();
-      this.lastSyncAt = new Date().toISOString();
-      this.cronStatus = "idle";
       this.save();
-    }, 3_500);
+    })();
 
     return { already: false };
   }

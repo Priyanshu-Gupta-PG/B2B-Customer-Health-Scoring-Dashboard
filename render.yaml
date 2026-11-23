@@ -25,6 +25,12 @@ services:
         value: "0 0 * * *"
       - key: SEED_ACCOUNT_COUNT
         value: 150
+      - key: STRIPE_MOCK_URL
+        value: https://ledger-wire-stripe-mock.vercel.app
+      - key: ZENDESK_MOCK_URL
+        value: https://desk-relay-zendesk-mock.vercel.app
+      - key: PRODUCT_MOCK_URL
+        value: https://signal-meter-product-mock.vercel.app
 
   # ----------------------------------------------------
   # 2. Next.js Frontend

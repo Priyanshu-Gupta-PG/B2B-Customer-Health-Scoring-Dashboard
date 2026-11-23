@@ -8,3 +8,7 @@ dist
 .next
 coverage
 *.tsbuildinfo
+
+# mock site local installs
+mock-sources/*/node_modules/
+mock-sources/*/.vercel/
