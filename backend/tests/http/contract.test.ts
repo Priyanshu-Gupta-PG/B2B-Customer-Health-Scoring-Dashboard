@@ -64,6 +64,14 @@ describe("HTTP contract (no database)", () => {
     assert.equal(body.title, "Validation Error");
   });
 
+  it("GET /api/v1/auth/google/config reports whether Google is configured", async () => {
+    const res = await fetch(`${base}/api/v1/auth/google/config`);
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { client_id: string | null; configured: boolean };
+    assert.equal(body.configured, false);
+    assert.equal(body.client_id, null);
+  });
+
   it("POST /api/v1/auth/google rejects an empty body", async () => {
     const res = await fetch(`${base}/api/v1/auth/google`, {
       method: "POST",

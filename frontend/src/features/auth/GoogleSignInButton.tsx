@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { env } from "@/lib/env";
+import { fetchGoogleClientId } from "./api";
 
 interface GoogleCredentialResponse {
   credential: string;
@@ -86,6 +87,8 @@ export function GoogleSignInButton({ onCredential, disabled = false, onError }: 
   const host = useRef<HTMLDivElement>(null);
   const onCredentialRef = useRef(onCredential);
   const onErrorRef = useRef(onError);
+  const [clientId, setClientId] = useState(env.googleClientId);
+  const [resolving, setResolving] = useState(!env.googleClientId);
   const [gisReady, setGisReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -98,13 +101,45 @@ export function GoogleSignInButton({ onCredential, disabled = false, onError }: 
   }, [onError]);
 
   useEffect(() => {
-    if (!env.googleClientId || !host.current || disabled) return;
+    if (env.googleClientId) {
+      setClientId(env.googleClientId);
+      setResolving(false);
+      return;
+    }
+    let cancelled = false;
+    setResolving(true);
+    fetchGoogleClientId()
+      .then((id) => {
+        if (cancelled) return;
+        setClientId(id ?? "");
+        setResolving(false);
+        if (!id) {
+          setLoadError(
+            "Google sign-in is not configured on the API. Set GOOGLE_CLIENT_ID on the backend service.",
+          );
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setClientId("");
+        setResolving(false);
+        setLoadError(
+          "Could not load Google sign-in config from the API. Check NEXT_PUBLIC_API_URL points at the live backend.",
+        );
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!clientId || !host.current || disabled || resolving) return;
     let cancelled = false;
     loadGis()
       .then(() => {
         if (cancelled || !host.current || !window.google) return;
         window.google.accounts.id.initialize({
-          client_id: env.googleClientId,
+          client_id: clientId,
           callback: (response) => {
             void onCredentialRef.current(response.credential);
           },
@@ -136,24 +171,36 @@ export function GoogleSignInButton({ onCredential, disabled = false, onError }: 
       cancelled = true;
       window.google?.accounts?.id?.cancel?.();
     };
-  }, [disabled]);
+  }, [clientId, disabled, resolving]);
 
-  if (!env.googleClientId) {
+  if (resolving) {
+    return <p className="text-center text-xs text-text-muted">Loading Google…</p>;
+  }
+
+  if (!clientId) {
     return (
-      <Button
-        type="button"
-        variant="secondary"
-        size="lg"
-        className="w-full gap-2"
-        onClick={() =>
-          onError?.(
-            "Google sign-in is not configured. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID (frontend) and GOOGLE_CLIENT_ID (API).",
-          )
-        }
-      >
-        <GoogleMark />
-        Continue with Google
-      </Button>
+      <div className="space-y-2">
+        <Button
+          type="button"
+          variant="secondary"
+          size="lg"
+          className="w-full gap-2"
+          onClick={() =>
+            onError?.(
+              loadError ??
+                "Google sign-in is not configured. Set GOOGLE_CLIENT_ID on the API (and optionally NEXT_PUBLIC_GOOGLE_CLIENT_ID on the frontend).",
+            )
+          }
+        >
+          <GoogleMark />
+          Continue with Google
+        </Button>
+        {loadError ? (
+          <p className="text-xs font-medium text-rose-400" role="alert">
+            {loadError}
+          </p>
+        ) : null}
+      </div>
     );
   }
 

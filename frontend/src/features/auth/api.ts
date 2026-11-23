@@ -10,3 +10,10 @@ export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
   const { data } = await apiClient.post<LoginResponse>("/auth/google", { id_token: idToken });
   return data;
 }
+
+export async function fetchGoogleClientId(): Promise<string | null> {
+  const { data } = await apiClient.get<{ client_id: string | null; configured: boolean }>(
+    "/auth/google/config",
+  );
+  return data.client_id?.trim() || null;
+}

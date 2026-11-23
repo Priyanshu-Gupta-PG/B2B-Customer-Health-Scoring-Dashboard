@@ -65,6 +65,14 @@ export const handlers = [
     return HttpResponse.json(session);
   }),
 
+  http.get(`${API}/auth/google/config`, async () => {
+    await jitter();
+    return HttpResponse.json({
+      client_id: env.googleClientId || null,
+      configured: Boolean(env.googleClientId),
+    });
+  }),
+
   http.post(`${API}/auth/google`, async ({ request }) => {
     await jitter();
     const body = (await request.json().catch(() => null)) as { id_token?: string } | null;
