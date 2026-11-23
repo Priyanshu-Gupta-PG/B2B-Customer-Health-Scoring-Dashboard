@@ -119,12 +119,13 @@ export function GoogleSignInButton({ onCredential, disabled = false, onError }: 
           );
         }
       })
-      .catch(() => {
+      .catch((err) => {
         if (cancelled) return;
         setClientId("");
         setResolving(false);
+        const detail = err instanceof Error ? err.message : "Unknown error";
         setLoadError(
-          "Could not load Google sign-in config from the API. Check NEXT_PUBLIC_API_URL points at the live backend.",
+          `Could not load Google sign-in config from the API (${detail}). Open the API once to wake it, then refresh: ${env.apiOrigin}/health`,
         );
       });
     return () => {
