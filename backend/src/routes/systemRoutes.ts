@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../infrastructure/prisma.js";
-import { startedAt } from "../config/index.js";
+import { config, startedAt } from "../config/index.js";
 import { requireAdmin } from "../middleware/auth.js";
 import { writeAudit } from "../services/AuditService.js";
 import { currentCronStatus, triggerManualIngest } from "../workers/cronManager.js";
@@ -40,6 +40,12 @@ healthRouter.get("/", async (_req, res) => {
   const last = system?.lastIngestionAt ?? null;
   const next = last ? new Date(last.getTime() + 15 * 60_000) : null;
 
+  const gitSha =
+    process.env.RENDER_GIT_COMMIT ||
+    process.env.GIT_COMMIT ||
+    process.env.COMMIT_SHA ||
+    null;
+
   const body = {
     status: postgres === "connected" ? "ok" : "degraded",
     postgres,
@@ -47,6 +53,13 @@ healthRouter.get("/", async (_req, res) => {
     uptime_seconds: Math.floor((Date.now() - startedAt) / 1000),
     last_ingestion_at: last?.toISOString() ?? null,
     next_ingestion_at: next?.toISOString() ?? null,
+    // Present after Render rebuilds from main — use to confirm live-mock integration is deployed.
+    git_sha: gitSha ? gitSha.slice(0, 12) : null,
+    metric_sources: {
+      stripe: config.stripeMockUrl,
+      zendesk: config.zendeskMockUrl,
+      product: config.productMockUrl,
+    },
   };
 
   res.status(postgres === "connected" ? 200 : 503).json(body);

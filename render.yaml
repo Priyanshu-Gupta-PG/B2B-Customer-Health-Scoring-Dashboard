@@ -7,6 +7,8 @@ services:
     runtime: node
     rootDir: backend
     plan: free
+    branch: main
+    autoDeploy: true
     buildCommand: npm install --include=dev && npx prisma generate && npm run build
     startCommand: npm start
     healthCheckPath: /health
@@ -25,6 +27,7 @@ services:
         value: "0 0 * * *"
       - key: SEED_ACCOUNT_COUNT
         value: 150
+      # Live mock data websites (required — no local jitter fallback in current main)
       - key: STRIPE_MOCK_URL
         value: https://ledger-wire-stripe-mock.vercel.app
       - key: ZENDESK_MOCK_URL
@@ -40,6 +43,8 @@ services:
     runtime: node
     rootDir: frontend
     plan: free
+    branch: main
+    autoDeploy: true
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:

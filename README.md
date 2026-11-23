@@ -99,3 +99,20 @@ With `NEXT_PUBLIC_USE_MOCKS=true` the frontend runs without the API.
 
 Admin **Trigger ingestion** on Settings pulls fresh random metrics from the three
 mock websites, recalculates 0–100 health scores, and updates the dashboard.
+
+## Render (production)
+
+Services expected:
+
+- Backend: `https://b2b-customer-health-scoring-dashboard.onrender.com`
+- Frontend: `https://b2b-health-frontend.onrender.com`
+
+After merging to `main`, if the site still shows old scores:
+
+1. In the [Render dashboard](https://dashboard.render.com), open each service → **Manual Deploy** → **Deploy latest commit**.
+2. On the backend service, confirm env vars (or rely on code defaults after redeploy):
+   - `STRIPE_MOCK_URL=https://ledger-wire-stripe-mock.vercel.app`
+   - `ZENDESK_MOCK_URL=https://desk-relay-zendesk-mock.vercel.app`
+   - `PRODUCT_MOCK_URL=https://signal-meter-product-mock.vercel.app`
+3. Open the app → Settings → **Trigger Data Ingestion**.
+4. Confirm deploy via `GET /health` — response should include `git_sha` and `metric_sources` pointing at the Vercel mock URLs.
