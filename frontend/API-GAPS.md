@@ -59,8 +59,8 @@ Base path is `/api/v1` unless noted. Auth is `Authorization: Bearer <jwt>` excep
 
 No additional HTTP paths exist beyond the tables above. Mock-only **behavior** worth knowing:
 
-- Login seed users (not part of the API spec): `admin@company.com` / `Admin123!` and `csm@company.com` / `Csm12345!`.
-- JWT is a base64 JSON blob, not a signed token.
+- Mock sample login via `POST /api/v1/auth/demo` `{ "role": "admin" | "csm" }` (not part of the API spec). Password login still works against SHA-256 digests; no plaintext demo passwords ship in the client.
+- Mock bearer tokens are opaque (`mock_<uuid>`) and validated against an in-memory/localStorage session map — not forgeable JWT payloads.
 - Manual ingest mutates ~20% of accounts after ~3.5s and writes an `INGESTION_TRIGGERED` audit row.
 - Bulk rule save writes `RULES_BULK_UPDATED` (and related) audit actions. Spec only names per-rule updates.
 - RFC 7807 `application/problem+json` bodies on 4xx.
