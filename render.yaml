@@ -1,3 +1,5 @@
+# Prefer Native Node + rootDir (below). If a service is created as Docker instead,
+# point Dockerfile Path at ./Dockerfile (API) or ./frontend/Dockerfile (UI).
 services:
   # ----------------------------------------------------
   # 1. Express API Backend

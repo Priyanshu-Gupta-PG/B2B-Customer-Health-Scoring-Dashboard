@@ -102,17 +102,28 @@ mock websites, recalculates 0–100 health scores, and updates the dashboard.
 
 ## Render (production)
 
-Services expected:
+You need **two** web services (API + UI), not one Docker service at the repo root.
 
-- Backend: `https://b2b-customer-health-scoring-dashboard.onrender.com`
-- Frontend: `https://b2b-health-frontend.onrender.com`
+| Service | URL | Settings |
+|---------|-----|----------|
+| Backend | `https://b2b-customer-health-scoring-dashboard.onrender.com` | Native **Node**, Root Directory `backend` (or Docker with Dockerfile Path `./Dockerfile` / `./backend/Dockerfile`) |
+| Frontend | `https://b2b-health-frontend.onrender.com` | Native **Node**, Root Directory `frontend` (or Docker: Dockerfile Path `./frontend/Dockerfile`, Context `./frontend`) |
 
-After merging to `main`, if the site still shows old scores:
+### Fix: `open Dockerfile: no such file or directory`
 
-1. In the [Render dashboard](https://dashboard.render.com), open each service → **Manual Deploy** → **Deploy latest commit**.
-2. On the backend service, confirm env vars (or rely on code defaults after redeploy):
+That error means the service is **Docker** with context at the **repo root**, but historically there was no root Dockerfile. Main now includes a root `Dockerfile` that builds the **backend**. After pulling latest `main`, **Manual Deploy** again — or switch the service to:
+
+1. **Language / Environment:** Node (not Docker)
+2. **Root Directory:** `backend`
+3. **Build Command:** `npm install --include=dev && npx prisma generate && npm run build`
+4. **Start Command:** `npm start`
+5. **Health Check Path:** `/health`
+
+### After a successful deploy
+
+1. Confirm backend env vars (or rely on code defaults):
    - `STRIPE_MOCK_URL=https://ledger-wire-stripe-mock.vercel.app`
    - `ZENDESK_MOCK_URL=https://desk-relay-zendesk-mock.vercel.app`
    - `PRODUCT_MOCK_URL=https://signal-meter-product-mock.vercel.app`
-3. Open the app → Settings → **Trigger Data Ingestion**.
-4. Confirm deploy via `GET /health` — response should include `git_sha` and `metric_sources` pointing at the Vercel mock URLs.
+2. App → Settings → **Trigger Data Ingestion**
+3. `GET /health` should include `git_sha` and `metric_sources` pointing at those Vercel URLs
