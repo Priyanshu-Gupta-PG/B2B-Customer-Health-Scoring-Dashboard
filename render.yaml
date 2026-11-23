@@ -28,7 +28,10 @@ services:
       - key: SNAPSHOT_CRON
         value: "0 0 * * *"
       - key: SEED_ACCOUNT_COUNT
-        value: 150
+        value: 50
+      # Auto-seed empty DB on boot (needed on free plan — no Shell access)
+      - key: SEED_ON_BOOT
+        value: "true"
       # Live mock data websites (required — no local jitter fallback in current main)
       - key: STRIPE_MOCK_URL
         value: https://ledger-wire-stripe-mock.vercel.app

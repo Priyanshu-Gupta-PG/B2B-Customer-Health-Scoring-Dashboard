@@ -125,5 +125,7 @@ That error means the service is **Docker** with context at the **repo root**, bu
    - `STRIPE_MOCK_URL=https://ledger-wire-stripe-mock.vercel.app`
    - `ZENDESK_MOCK_URL=https://desk-relay-zendesk-mock.vercel.app`
    - `PRODUCT_MOCK_URL=https://signal-meter-product-mock.vercel.app`
-2. App → Settings → **Trigger Data Ingestion**
-3. `GET /health` should include `git_sha` and `metric_sources` pointing at those Vercel URLs
+   - `SEED_ON_BOOT=true` (default) — empty DBs auto-seed on startup (free plan has no Shell)
+2. First boot creates `admin@company.com` / `Admin123!` and pulls metrics from the mock sites
+3. App → Settings → **Trigger Data Ingestion** to refresh scores
+4. `GET /health` should include `git_sha` and `metric_sources` pointing at those Vercel URLs
