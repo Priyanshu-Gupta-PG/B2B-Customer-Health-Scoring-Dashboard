@@ -6,4 +6,6 @@ export const env = {
   /** e.g. http://localhost:4000 — /health lives here, outside /api/v1 */
   apiOrigin: rawApiUrl.replace(/\/api\/v\d+\/?$/, "").replace(/\/$/, ""),
   useMocks: process.env.NEXT_PUBLIC_USE_MOCKS === "true",
+  /** Google Identity Services Web Client ID (must match API GOOGLE_CLIENT_ID). */
+  googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ?? "",
 } as const;

@@ -74,7 +74,9 @@ export default function LoginPage() {
           </div>
           <div className="mb-6">
             <h1 className="text-2xl font-semibold tracking-tight text-text">Access Console</h1>
-            <p className="mt-1 text-xs text-text-muted">Enter authorized Customer Success credentials to sign in.</p>
+            <p className="mt-1 text-xs text-text-muted">
+              Continue with Google or sign in with demo email credentials.
+            </p>
           </div>
           <div>
             <Suspense fallback={null}>

@@ -66,6 +66,13 @@ export const config = {
   zendeskMockUrl: process.env.ZENDESK_MOCK_URL || DEFAULT_ZENDESK_MOCK_URL,
   /** Product-usage mock website (Signal Meter). */
   productMockUrl: process.env.PRODUCT_MOCK_URL || DEFAULT_PRODUCT_MOCK_URL,
+  /** Google OAuth Web Client ID (GIS / ID token audience). */
+  googleClientId: process.env.GOOGLE_CLIENT_ID?.trim() ?? "",
+  /** Comma-separated emails that always receive admin on first Google sign-up. */
+  googleAdminEmails: (process.env.GOOGLE_ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
   jwt: {
     privateKey: keys.privateKey,
     publicKey: keys.publicKey,
