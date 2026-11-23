@@ -47,6 +47,7 @@ Base path is `/api/v1` unless noted. Auth is `Authorization: Bearer <jwt>` excep
 | Method | Path | Notes |
 | --- | --- | --- |
 | `POST` | `/api/v1/auth/login` | Seed users below |
+| `POST` | `/api/v1/auth/google` | Body `{ "id_token": "<GIS credential>" }` — creates/links admin user |
 | `GET` | `/api/v1/accounts` | `status`, `search`, `limit`, `offset`. UI currently fetches `limit=500` and filters client-side. |
 | `GET` | `/api/v1/accounts/:id/history` | `days` 1–90 (UI uses 7 / 30 / 90) |
 | `GET` | `/api/v1/rules` | `{ data: ScoringRule[] }` |

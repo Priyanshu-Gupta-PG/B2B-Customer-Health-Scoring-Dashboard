@@ -191,20 +191,41 @@ class MockDb {
 
   // ---------- auth ----------
 
-  login(email: string, password: string): LoginResponse | null {
-    const user = MOCK_USERS.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password,
-    );
-    if (!user) return null;
+  private sessionFor(user: AuthUser): LoginResponse {
     const expires = new Date(Date.now() + 24 * 3600 * 1000);
     const payload = btoa(
-      JSON.stringify({ sub: user.id, email: user.email, role: user.role, exp: expires.getTime() }),
+      JSON.stringify({
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+        exp: expires.getTime(),
+      }),
     );
     return {
       token: `mock.${payload}.sig`,
       expires_at: expires.toISOString(),
       user: { id: user.id, email: user.email, role: user.role, name: user.name },
     };
+  }
+
+  login(email: string, password: string): LoginResponse | null {
+    const user = MOCK_USERS.find(
+      (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password,
+    );
+    if (!user) return null;
+    return this.sessionFor({ id: user.id, email: user.email, role: user.role, name: user.name });
+  }
+
+  loginWithGoogle(idToken: string): LoginResponse | null {
+    if (!idToken.trim()) return null;
+    const user: AuthUser = {
+      id: "google-user-1",
+      email: "google.user@example.com",
+      role: "admin",
+      name: "Google User",
+    };
+    return this.sessionFor(user);
   }
 
   userFromToken(token: string | null): AuthUser | null {
@@ -214,11 +235,16 @@ class MockDb {
         sub: string;
         email: string;
         role: AuthUser["role"];
+        name?: string;
         exp: number;
       };
       if (payload.exp <= Date.now()) return null;
       const user = MOCK_USERS.find((u) => u.id === payload.sub);
-      return user ? { id: user.id, email: user.email, role: user.role, name: user.name } : null;
+      if (user) return { id: user.id, email: user.email, role: user.role, name: user.name };
+      if (payload.sub && payload.email && (payload.role === "admin" || payload.role === "csm")) {
+        return { id: payload.sub, email: payload.email, role: payload.role, name: payload.name };
+      }
+      return null;
     } catch {
       return null;
     }

@@ -39,6 +39,11 @@ services:
         value: https://desk-relay-zendesk-mock.vercel.app
       - key: PRODUCT_MOCK_URL
         value: https://signal-meter-product-mock.vercel.app
+      # Google OAuth Web Client ID (set in Render dashboard; same value as frontend)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_ADMIN_EMAILS
+        sync: false
 
   # ----------------------------------------------------
   # 2. Next.js Frontend
@@ -58,4 +63,6 @@ services:
       - key: NEXT_PUBLIC_USE_MOCKS
         value: "false"
       - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
         sync: false

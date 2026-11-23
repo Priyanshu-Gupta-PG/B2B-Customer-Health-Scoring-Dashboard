@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useMemo, useSyncExternalStore, 
 import { useQueryClient } from "@tanstack/react-query";
 import type { AuthUser, LoginRequest } from "@/types/api";
 import { AUTH_CHANGE_EVENT, clearSession, notifyAuthChange, readSession, writeSession } from "@/lib/auth";
-import { login as loginRequest } from "./api";
+import { login as loginRequest, loginWithGoogle as loginWithGoogleRequest } from "./api";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -13,6 +13,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (body: LoginRequest) => Promise<AuthUser>;
+  loginWithGoogle: (idToken: string) => Promise<AuthUser>;
   logout: () => void;
 }
 
@@ -68,6 +69,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [queryClient],
   );
 
+  const loginWithGoogle = useCallback(
+    async (idToken: string) => {
+      const res = await loginWithGoogleRequest(idToken);
+      writeSession({ token: res.token, user: res.user, expiresAt: res.expires_at });
+      notifyAuthChange();
+      queryClient.clear();
+      return res.user;
+    },
+    [queryClient],
+  );
+
   const logout = useCallback(() => {
     clearSession();
     notifyAuthChange();
@@ -81,9 +93,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!user,
       isAdmin: user?.role === "admin",
       login,
+      loginWithGoogle,
       logout,
     }),
-    [user, isLoading, login, logout],
+    [user, isLoading, login, loginWithGoogle, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -65,6 +65,19 @@ export const handlers = [
     return HttpResponse.json(session);
   }),
 
+  http.post(`${API}/auth/google`, async ({ request }) => {
+    await jitter();
+    const body = (await request.json().catch(() => null)) as { id_token?: string } | null;
+    if (!body?.id_token) {
+      return problem(422, "Validation Error", "Google credential is required.", "/api/v1/auth/google");
+    }
+    const session = mockDb().loginWithGoogle(body.id_token);
+    if (!session) {
+      return problem(401, "Unauthorized", "Google sign-in could not be verified.", "/api/v1/auth/google");
+    }
+    return HttpResponse.json(session);
+  }),
+
   // ---------- Accounts ----------
   http.get(`${API}/accounts`, async ({ request }) => {
     const auth = authenticate(request);

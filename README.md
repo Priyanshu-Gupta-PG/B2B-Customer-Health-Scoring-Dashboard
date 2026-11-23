@@ -95,6 +95,15 @@ npm run dev
 
 Demo users: `admin@company.com` / `Admin123!` and `csm@company.com` / `Csm12345!`.
 
+**Google sign-in** (optional, alongside email/password): create an OAuth 2.0 **Web** client in
+[Google Cloud Console](https://console.cloud.google.com/apis/credentials), add your UI origin
+(e.g. `http://localhost:3000`) under Authorized JavaScript origins, then set the same Client ID in:
+
+- `backend/.env` → `GOOGLE_CLIENT_ID=...`
+- `frontend/.env.local` → `NEXT_PUBLIC_GOOGLE_CLIENT_ID=...`
+- optional `GOOGLE_ADMIN_EMAILS=you@company.com` so listed emails become admin on first Google sign-up
+  (otherwise the first Google account is admin; later ones are CSM)
+
 With `NEXT_PUBLIC_USE_MOCKS=true` the frontend runs without the API.
 
 Admin **Trigger ingestion** on Settings pulls fresh random metrics from the three
@@ -127,5 +136,7 @@ That error means the service is **Docker** with context at the **repo root**, bu
    - `PRODUCT_MOCK_URL=https://signal-meter-product-mock.vercel.app`
    - `SEED_ON_BOOT=true` (default) — empty DBs auto-seed on startup (free plan has no Shell)
 2. First boot creates `admin@company.com` / `Admin123!` and pulls metrics from the mock sites
-3. App → Settings → **Trigger Data Ingestion** to refresh scores
-4. `GET /health` should include `git_sha` and `metric_sources` pointing at those Vercel URLs
+3. For Google login, set `GOOGLE_CLIENT_ID` on the API and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` on the UI
+   (same Web client ID; add the frontend origin in Google Cloud → Authorized JavaScript origins)
+4. App → Settings → **Trigger Data Ingestion** to refresh scores
+5. `GET /health` should include `git_sha` and `metric_sources` pointing at those Vercel URLs
