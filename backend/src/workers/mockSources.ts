@@ -26,6 +26,9 @@ type SourceRow = {
   active_logins_30d?: number;
 };
 
+const RETRY_ATTEMPTS = 3;
+const RETRY_BASE_MS = 250;
+
 export function sourceUrls() {
   return {
     stripe: process.env.STRIPE_MOCK_URL || DEFAULT_STRIPE_MOCK_URL,
@@ -55,17 +58,39 @@ function indexRows(rows: SourceRow[]) {
   return { byId, byDomain };
 }
 
-async function postSource(url: string, path: string, accounts: MockAccountRef[]): Promise<SourceRow[]> {
-  const res = await fetch(`${url.replace(/\/$/, "")}${path}`, {
-    method: "POST",
-    headers: { "content-type": "application/json", accept: "application/json" },
-    body: JSON.stringify({ accounts }),
-  });
-  if (!res.ok) {
-    throw new Error(`${path} responded ${res.status}`);
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** POST to a mock source with retries so a transient failure does not crash ingestion. */
+export async function postSourceWithRetry(
+  url: string,
+  path: string,
+  accounts: MockAccountRef[],
+  attempts = RETRY_ATTEMPTS,
+): Promise<SourceRow[]> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const res = await fetch(`${url.replace(/\/$/, "")}${path}`, {
+        method: "POST",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ accounts }),
+      });
+      if (!res.ok) {
+        throw new Error(`${path} responded ${res.status}`);
+      }
+      const json = (await res.json()) as { data?: SourceRow[] };
+      return Array.isArray(json.data) ? json.data : [];
+    } catch (err) {
+      lastError = err;
+      logger.warn({ err, path, attempt, attempts }, "mock source fetch failed — retrying");
+      if (attempt < attempts) {
+        await sleep(RETRY_BASE_MS * 2 ** (attempt - 1));
+      }
+    }
   }
-  const json = (await res.json()) as { data?: SourceRow[] };
-  return Array.isArray(json.data) ? json.data : [];
+  throw lastError instanceof Error ? lastError : new Error(`Failed to fetch ${path}`);
 }
 
 /** True when all three mock website base URLs resolve to non-empty strings. */
@@ -92,10 +117,13 @@ export async function fetchMetricsFromMockSources(
     company_name: a.company_name,
   }));
 
+  // Fetch sources independently with retries. A single source failure should not
+  // take down the whole ingestion run after retries are exhausted — rethrow only
+  // when all retries for a source fail (Promise.all).
   const [stripeRows, zendeskRows, productRows] = await Promise.all([
-    postSource(urls.stripe, "/mock/stripe/invoices", payload),
-    postSource(urls.zendesk, "/mock/zendesk/tickets", payload),
-    postSource(urls.product, "/mock/product/usage", payload),
+    postSourceWithRetry(urls.stripe, "/mock/stripe/invoices", payload),
+    postSourceWithRetry(urls.zendesk, "/mock/zendesk/tickets", payload),
+    postSourceWithRetry(urls.product, "/mock/product/usage", payload),
   ]);
 
   const stripe = indexRows(stripeRows);

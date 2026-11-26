@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Building2, ClipboardList, LayoutDashboard, Menu, Settings, SlidersHorizontal, X } from "lucide-react";
+import {
+  Building2,
+  ClipboardList,
+  LayoutDashboard,
+  ListTodo,
+  Menu,
+  Settings,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "./Logo";
 import { UserMenu } from "./UserMenu";
@@ -13,6 +22,7 @@ const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/accounts", label: "Accounts", icon: Building2 },
   { href: "/rules", label: "Scoring Rules", icon: SlidersHorizontal },
+  { href: "/playbooks", label: "Playbooks", icon: ListTodo },
   { href: "/audit-log", label: "Audit Log", icon: ClipboardList },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;

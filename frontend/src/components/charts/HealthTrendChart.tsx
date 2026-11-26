@@ -18,12 +18,13 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { cn } from "@/lib/cn";
 
-export const HISTORY_RANGES = [7, 30, 90] as const;
+/** PRD US-004: last 30 / 60 / 90 days of score changes. */
+export const HISTORY_RANGES = [30, 60, 90] as const;
 export type HistoryRange = (typeof HISTORY_RANGES)[number];
 
 const RANGE_LABEL: Record<HistoryRange, string> = {
-  7: "7 days",
   30: "30 days",
+  60: "60 days",
   90: "90 days",
 };
 
@@ -76,7 +77,7 @@ export function HealthTrendChart({
                   tick={{ fill: "#949ca8", fontSize: 11 }}
                   axisLine={{ stroke: "rgba(255, 255, 255, 0.07)" }}
                   tickLine={false}
-                  minTickGap={days === 7 ? 8 : 24}
+                  minTickGap={days === 30 ? 16 : 24}
                 />
                 <YAxis
                   domain={[0, 100]}
@@ -94,7 +95,7 @@ export function HealthTrendChart({
                   stroke={stroke}
                   strokeWidth={2.5}
                   fill="url(#scoreAreaGradient)"
-                  dot={days === 7 ? { r: 3, fill: stroke } : false}
+                  dot={days === 30 ? { r: 2, fill: stroke } : false}
                   activeDot={{ r: 5, fill: stroke, stroke: "#11141a", strokeWidth: 2 }}
                 />
               </AreaChart>

@@ -95,6 +95,8 @@ npm run dev
 
 Demo users: `admin@company.com` / `Admin123!` and `csm@company.com` / `Csm12345!`.
 
+REST surface: [docs/API.md](docs/API.md).
+
 **Google sign-in** (optional, alongside email/password): create an OAuth 2.0 **Web** client in
 [Google Cloud Console](https://console.cloud.google.com/apis/credentials), add your UI origin
 (e.g. `http://localhost:3000`) under Authorized JavaScript origins, then set the same Client ID in:

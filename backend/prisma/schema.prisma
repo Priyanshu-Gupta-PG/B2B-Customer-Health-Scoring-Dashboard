@@ -33,6 +33,7 @@ model Account {
   updatedAt     DateTime         @updatedAt @map("updated_at")
   metrics       AccountMetric[]
   snapshots     ScoreSnapshot[]
+  playbookTasks PlaybookTask[]
 
   @@index([healthStatus])
   @@index([currentScore])
@@ -104,4 +105,21 @@ model SystemState {
   cronStatus      String    @default("idle") @map("cron_status")
 
   @@map("system_state")
+}
+
+/** PRD F-011 — automated playbook tasks when score drops below threshold. */
+model PlaybookTask {
+  id          String    @id @default(uuid())
+  accountId   String    @map("account_id")
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  title       String
+  reason      String
+  score       Int
+  status      String    @default("open")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  completedAt DateTime? @map("completed_at")
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([accountId])
+  @@map("playbook_tasks")
 }

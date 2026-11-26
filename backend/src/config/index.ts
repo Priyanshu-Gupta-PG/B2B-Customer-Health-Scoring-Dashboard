@@ -73,6 +73,10 @@ export const config = {
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean),
+  /** Slack-compatible webhook for Critical health transitions (PRD F-010). */
+  alertWebhookUrl: process.env.ALERT_WEBHOOK_URL?.trim() ?? "",
+  /** Mock CRM endpoint for pushing scores (PRD F-009). Empty disables sync. */
+  crmSyncUrl: process.env.CRM_SYNC_URL?.trim() ?? "",
   jwt: {
     privateKey: keys.privateKey,
     publicKey: keys.publicKey,
