@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../infrastructure/prisma.js";
-import { ScoringCalculator } from "../engine/ScoringCalculator.js";
 import { fetchMetricsFromMockSources } from "../workers/mockSources.js";
 import { recalculateAll } from "../engine/RecalculationService.js";
 import { logger } from "../infrastructure/logger.js";
+import { backfillScoreHistory } from "./historyBackfill.js";
 
 function mulberry32(seed: number) {
   let a = seed >>> 0;
@@ -51,6 +51,7 @@ export async function runDemoSeed() {
   const csmHash = await bcrypt.hash("Csm12345!", 12);
 
   await prisma.auditLog.deleteMany();
+  await prisma.playbookTask.deleteMany();
   await prisma.scoreSnapshot.deleteMany();
   await prisma.accountMetric.deleteMany();
   await prisma.account.deleteMany();
@@ -150,20 +151,8 @@ export async function runDemoSeed() {
   }
 
   const { accounts: scored } = await recalculateAll();
-
-  const scoredAccounts = await prisma.account.findMany({
-    select: { id: true, currentScore: true, healthStatus: true },
-  });
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  await prisma.scoreSnapshot.createMany({
-    data: scoredAccounts.map((a) => ({
-      accountId: a.id,
-      calculatedScore: a.currentScore,
-      healthStatus: a.healthStatus || ScoringCalculator.getStatusTier(a.currentScore),
-      recordedAt: today,
-    })),
-  });
+  // recalculateAll upserts today's snapshot; backfill the prior 89 days for US-004 charts.
+  const history = await backfillScoreHistory(90);
 
   await prisma.systemState.create({
     data: { id: "singleton", cronStatus: "idle", lastIngestionAt: recordedAt },
@@ -181,7 +170,10 @@ export async function runDemoSeed() {
     },
   });
 
-  logger.info({ accounts: accountRefs.length, applied, scored }, "Demo seed complete");
+  logger.info(
+    { accounts: accountRefs.length, applied, scored, historyInserted: history.inserted },
+    "Demo seed complete",
+  );
 }
 
 /** Seed only when the database has no admin users (safe for Render free-tier boot). */

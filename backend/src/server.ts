@@ -3,6 +3,7 @@ import { config } from "./config/index.js";
 import { logger } from "./infrastructure/logger.js";
 import { prisma } from "./infrastructure/prisma.js";
 import { seedIfEmpty } from "./bootstrap/demoSeed.js";
+import { backfillScoreHistoryIfSparse } from "./bootstrap/historyBackfill.js";
 import { startCron } from "./workers/cronManager.js";
 
 async function main() {
@@ -16,6 +17,14 @@ async function main() {
     } catch (err) {
       logger.error({ err }, "Boot seed failed — API will start anyway");
     }
+  }
+
+  // PRD F-008 / US-004 — fill missing daily snapshots so 30/60/90 charts have data on live DBs.
+  try {
+    const history = await backfillScoreHistoryIfSparse();
+    if (!history.skipped) logger.info(history, "Boot score-history backfill finished");
+  } catch (err) {
+    logger.error({ err }, "Score-history backfill failed — API will start anyway");
   }
 
   startCron();
