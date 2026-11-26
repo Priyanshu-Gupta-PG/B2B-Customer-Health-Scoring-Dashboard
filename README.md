@@ -120,6 +120,20 @@ You need **two** web services (API + UI), not one Docker service at the repo roo
 | Backend | `https://b2b-customer-health-scoring-dashboard.onrender.com` | Native **Node**, Root Directory `backend` (or Docker with Dockerfile Path `./Dockerfile` / `./backend/Dockerfile`) |
 | Frontend | `https://b2b-health-frontend.onrender.com` | Native **Node**, Root Directory `frontend` (or Docker: Dockerfile Path `./frontend/Dockerfile`, Context `./frontend`) |
 
+### Fix: `Environment variable not found: DATABASE_URL` (Prisma P1012)
+
+Docker start runs `prisma migrate deploy`, which **requires** `DATABASE_URL`. If it’s missing, the API exits immediately.
+
+1. Render → your **API** web service (not the frontend) → **Environment**
+2. **Add Environment Variable** (or **Add from**):
+   - Key: `DATABASE_URL`
+   - Value: open your Postgres (`b2bhealthscore`) → **Connect** → copy **Internal Database URL**
+   - Or: **Add from** → select the Postgres instance → choose `DATABASE_URL`
+3. Save → **Manual Deploy** → wait until Live
+4. Check `GET /health` → `"postgres":"connected"`
+
+Do **not** put `DATABASE_URL` only on the frontend service — the API container never sees it.
+
 ### Fix: `open Dockerfile: no such file or directory`
 
 That error means the service is **Docker** with context at the **repo root**, but historically there was no root Dockerfile. Main now includes a root `Dockerfile` that builds the **backend**. After pulling latest `main`, **Manual Deploy** again — or switch the service to:
