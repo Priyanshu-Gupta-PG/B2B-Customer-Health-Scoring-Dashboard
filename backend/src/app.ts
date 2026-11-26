@@ -11,6 +11,7 @@ import { accountRouter, dashboardRouter } from "./routes/accountRoutes.js";
 import { ruleRouter } from "./routes/ruleRoutes.js";
 import { auditRouter } from "./routes/auditRoutes.js";
 import { healthRouter, ingestRouter } from "./routes/systemRoutes.js";
+import { playbookRouter } from "./routes/playbookRoutes.js";
 
 export function createApp() {
   const app = express();
@@ -67,6 +68,7 @@ export function createApp() {
   api.use("/rules", ruleRouter);
   api.use("/audit-logs", auditRouter);
   api.use("/ingest", ingestRouter);
+  api.use("/playbooks", playbookRouter);
   app.use("/api/v1", api);
 
   app.use(notFound);

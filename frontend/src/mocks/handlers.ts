@@ -176,6 +176,26 @@ export const handlers = [
     return HttpResponse.json(result.result);
   }),
 
+  // ---------- Playbooks ----------
+  http.get(`${API}/playbooks`, async ({ request }) => {
+    const auth = authenticate(request);
+    if (!isUser(auth)) return auth;
+    await jitter();
+    return HttpResponse.json({ data: [], total: 0, limit: 50, offset: 0 });
+  }),
+
+  http.post(`${API}/playbooks/:id/complete`, async ({ request }) => {
+    const auth = authenticate(request);
+    if (!isUser(auth)) return auth;
+    const forbidden = requireAdmin(auth, request);
+    if (forbidden) return forbidden;
+    return HttpResponse.json({
+      id: "mock-task",
+      status: "done",
+      completed_at: new Date().toISOString(),
+    });
+  }),
+
   // ---------- Audit ----------
   http.get(`${API}/audit-logs`, async ({ request }) => {
     const auth = authenticate(request);

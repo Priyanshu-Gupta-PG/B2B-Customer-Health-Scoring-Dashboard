@@ -183,6 +183,22 @@ export interface HealthResponse {
   next_ingestion_at?: string | null;
 }
 
+// ---------- Playbooks (PRD F-011) ----------
+
+export interface PlaybookTask {
+  id: string;
+  account_id: string;
+  company_name: string;
+  owner_csm: string;
+  health_status: HealthStatus;
+  title: string;
+  reason: string;
+  score: number;
+  status: "open" | "done" | string;
+  created_at: string;
+  completed_at: string | null;
+}
+
 // ---------- Errors (RFC 7807) ----------
 
 export interface ProblemDetails {
